@@ -1,0 +1,7 @@
+/* Final interaction and responsive overrides. */
+.start-view:not(.active) { display: none !important; }
+.start-view.active { display: grid !important; }
+
+@media (max-width: 720px) {
+  .start-view.active { grid-template-columns: 1fr; }
+}
