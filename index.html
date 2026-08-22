@@ -6,6 +6,7 @@
     <meta name="theme-color" content="#0d5c63" />
     <title>CarePath — Healthcare Journey Demo</title>
     <link rel="stylesheet" href="src/styles.css" />
+    <link rel="stylesheet" href="src/overrides.css" />
   </head>
   <body>
     <main class="app-shell">
@@ -18,11 +19,16 @@
         </nav>
       </header>
 
-      <section id="patient-view" class="view active" aria-label="Patient journey">
+      <section id="start-view" class="view active start-view" aria-label="Start your visit">
+        <div class="start-copy"><p class="eyebrow">CITY GOVERNMENT HOSPITAL · SYNTHETIC PROTOTYPE</p><h1>Your visit,<br><em>made clear.</em></h1><p>CarePath turns the hospital’s verified visit updates into one simple answer: what do I do next?</p><div class="start-actions"><button id="start-appointment" class="primary-action">I already have an appointment <span>→</span></button><button class="secondary-action" disabled>I need help starting <small>Coming next</small></button></div><p class="privacy-note">No login. No medical advice. Synthetic demo data only.</p></div>
+        <aside class="start-preview"><div class="preview-top"><span>YOUR VISIT</span><span class="online-dot">Live updates</span></div><p class="eyebrow">NOW</p><h2>Appointment confirmed</h2><div class="preview-line"><span>NEXT</span><strong>Arrive at hospital</strong></div><div class="preview-line"><span>WHERE</span><strong>OPD Block A</strong></div><div class="mini-journey"><span class="complete">✓</span><i></i><span>2</span><i></i><span>3</span><i></i><span>4</span></div></aside>
+      </section>
+
+      <section id="patient-view" class="view" aria-label="Patient journey">
         <div class="patient-heading">
           <p class="eyebrow">TODAY'S VISIT</p>
           <h1>Good morning, Ravi.</h1>
-          <p id="appointment-line">Orthopaedics · Dr. Mehta · 10:30 AM</p>
+          <p id="appointment-line">City Government Hospital · Orthopaedics · Dr. Mehta</p>
         </div>
         <article class="journey-card" aria-live="polite">
           <div class="status-row"><span id="status-dot" class="status-dot"></span><span id="status-label">APPOINTMENT CONFIRMED</span><span id="last-updated">Updated 10:12 AM</span></div>
@@ -31,6 +37,7 @@
             <h2 id="now-title">Your appointment is confirmed</h2>
             <p id="now-body">Head to City Government Hospital when it is time to leave. We’ll guide you at every step.</p>
           </div>
+          <div id="journey-alert" class="journey-alert" hidden></div>
           <div class="journey-grid">
             <section class="info-tile next"><p class="eyebrow">NEXT</p><strong id="next-text">Tell us when you arrive</strong></section>
             <section class="info-tile where"><p class="eyebrow">WHERE</p><strong id="where-text">City Government Hospital</strong></section>
@@ -38,6 +45,8 @@
             <section class="info-tile done"><p class="eyebrow">DONE</p><strong id="done-text">Your visit will appear here</strong></section>
           </div>
           <button id="patient-action" class="primary-action">I’m at the hospital <span>→</span></button>
+          <button id="explain-action" class="explain-action">✦ Explain this simply</button>
+          <p id="explanation" class="explanation" hidden></p>
           <p id="supporting-note" class="supporting-note">Appointment ID: DEMO-042 · This is synthetic information for a prototype.</p>
         </article>
         <section class="timeline-section"><p class="eyebrow">JOURNEY</p><ol id="timeline" class="timeline"></ol></section>
@@ -51,7 +60,7 @@
             <div class="state-pill" id="staff-state">APPOINTMENT CONFIRMED</div>
             <dl><div><dt>Current room</dt><dd id="staff-room">202</dd></div><div><dt>Queue ahead</dt><dd id="staff-queue">—</dd></div><div><dt>Last update</dt><dd id="staff-updated">10:12 AM</dd></div></dl>
           </article>
-          <article class="staff-card controls"><p class="eyebrow">SIMULATE AN EVENT</p><h2>Patient flow</h2><div id="staff-controls" class="control-list"></div><button id="reset-demo" class="reset-button">Reset synthetic journey</button></article>
+          <article class="staff-card controls"><p class="eyebrow">SIMULATE AN EVENT</p><h2>Patient flow</h2><div id="staff-controls" class="control-list"></div><div class="simulated-sms"><p class="eyebrow">SIMULATED SMS</p><p id="sms-preview">CAREPATH: Appointment confirmed. Bring your appointment ID.</p></div><button id="reset-demo" class="reset-button">Reset synthetic journey</button></article>
         </div>
         <p class="staff-disclaimer">No real patient data, hospital systems, messaging, or clinical decisions are involved.</p>
       </section>
