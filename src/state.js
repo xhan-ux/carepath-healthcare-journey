@@ -26,6 +26,11 @@ export const initialJourney = Object.freeze({
     date: "22 Aug 2026",
     time: "10:30 AM"
   },
+  visit: {
+    token: "42",
+    registrationCounter: "Counter 3",
+    building: "OPD Block A · Ground Floor"
+  },
   state: JourneyState.APPOINTMENT_CONFIRMED,
   room: "202",
   queueAhead: null,
