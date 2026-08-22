@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0d5c63" />
+    <title>CarePath — Healthcare Journey Demo</title>
+    <link rel="stylesheet" href="src/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#patient" aria-label="CarePath home"><span class="brand-mark">+</span>CarePath</a>
+        <span class="demo-chip">Synthetic demo</span>
+        <nav aria-label="Demo views">
+          <button class="view-tab active" data-view="patient">Patient journey</button>
+          <button class="view-tab" data-view="staff">Staff simulator</button>
+        </nav>
+      </header>
+
+      <section id="patient-view" class="view active" aria-label="Patient journey">
+        <div class="patient-heading">
+          <p class="eyebrow">TODAY'S VISIT</p>
+          <h1>Good morning, Ravi.</h1>
+          <p id="appointment-line">Orthopaedics · Dr. Mehta · 10:30 AM</p>
+        </div>
+        <article class="journey-card" aria-live="polite">
+          <div class="status-row"><span id="status-dot" class="status-dot"></span><span id="status-label">APPOINTMENT CONFIRMED</span><span id="last-updated">Updated 10:12 AM</span></div>
+          <div class="primary-status">
+            <p class="eyebrow">NOW</p>
+            <h2 id="now-title">Your appointment is confirmed</h2>
+            <p id="now-body">Head to City Government Hospital when it is time to leave. We’ll guide you at every step.</p>
+          </div>
+          <div class="journey-grid">
+            <section class="info-tile next"><p class="eyebrow">NEXT</p><strong id="next-text">Tell us when you arrive</strong></section>
+            <section class="info-tile where"><p class="eyebrow">WHERE</p><strong id="where-text">City Government Hospital</strong></section>
+            <section class="info-tile wait"><p class="eyebrow">WAIT</p><strong id="wait-text">No queue yet</strong></section>
+            <section class="info-tile done"><p class="eyebrow">DONE</p><strong id="done-text">Your visit will appear here</strong></section>
+          </div>
+          <button id="patient-action" class="primary-action">I’m at the hospital <span>→</span></button>
+          <p id="supporting-note" class="supporting-note">Appointment ID: DEMO-042 · This is synthetic information for a prototype.</p>
+        </article>
+        <section class="timeline-section"><p class="eyebrow">JOURNEY</p><ol id="timeline" class="timeline"></ol></section>
+      </section>
+
+      <section id="staff-view" class="view" aria-label="Staff simulator">
+        <div class="staff-heading"><p class="eyebrow">CITY GOVERNMENT HOSPITAL · SYNTHETIC OPERATIONS VIEW</p><h1>Orthopaedics desk</h1><p>Use the controls below to move Ravi’s journey forward.</p></div>
+        <div class="staff-layout">
+          <article class="staff-card patient-summary">
+            <div><p class="eyebrow">PATIENT</p><h2>Ravi Kumar</h2><p>DEMO-042 · Dr. Mehta</p></div>
+            <div class="state-pill" id="staff-state">APPOINTMENT CONFIRMED</div>
+            <dl><div><dt>Current room</dt><dd id="staff-room">202</dd></div><div><dt>Queue ahead</dt><dd id="staff-queue">—</dd></div><div><dt>Last update</dt><dd id="staff-updated">10:12 AM</dd></div></dl>
+          </article>
+          <article class="staff-card controls"><p class="eyebrow">SIMULATE AN EVENT</p><h2>Patient flow</h2><div id="staff-controls" class="control-list"></div><button id="reset-demo" class="reset-button">Reset synthetic journey</button></article>
+        </div>
+        <p class="staff-disclaimer">No real patient data, hospital systems, messaging, or clinical decisions are involved.</p>
+      </section>
+    </main>
+    <script type="module" src="src/app.js"></script>
+  </body>
+</html>
