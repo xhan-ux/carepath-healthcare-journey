@@ -1,6 +1,25 @@
 import { applyEvent, canApplyEvent, EventType, initialJourney, JourneyState } from "./state.js";
 
-let journey = structuredClone(initialJourney);
+const JOURNEY_CACHE_KEY = "carepath:journey:v1";
+
+function loadCachedJourney() {
+  try {
+    const saved = localStorage.getItem(JOURNEY_CACHE_KEY);
+    return saved ? JSON.parse(saved) : structuredClone(initialJourney);
+  } catch {
+    return structuredClone(initialJourney);
+  }
+}
+
+function saveJourney() {
+  try {
+    localStorage.setItem(JOURNEY_CACHE_KEY, JSON.stringify(journey));
+  } catch {
+    // Offline caching is a progressive enhancement. The journey still works if storage is unavailable.
+  }
+}
+
+let journey = loadCachedJourney();
 let alertAcknowledged = false;
 
 const patientCopy = {
@@ -19,7 +38,26 @@ function fill(template) {
   return template.replaceAll("{room}", journey.room).replaceAll("{token}", journey.visit.token).replaceAll("{queue}", journey.queueAhead === 0 ? "No" : journey.queueAhead);
 }
 function formatState(state) { return state.replaceAll("_", " "); }
-function action(type, extra = {}) { journey = applyEvent(journey, { type, ...extra }); render(); }
+function action(type, extra = {}) {
+  journey = applyEvent(journey, { type, ...extra });
+  saveJourney();
+  render();
+}
+
+function setConnectionStatus() {
+  const connection = document.querySelector("#connection-status");
+  if (!connection) return;
+
+  if (navigator.onLine) {
+    connection.textContent = "Live";
+    connection.dataset.status = "online";
+    connection.title = "Connected. Journey updates can be refreshed from the service.";
+  } else {
+    connection.textContent = `Offline · Last known ${journey.lastUpdated}`;
+    connection.dataset.status = "offline";
+    connection.title = "You are offline. Showing the last saved journey state.";
+  }
+}
 
 function renderPatient() {
   const copy = patientCopy[journey.state].map(fill);
@@ -78,7 +116,11 @@ function explanationForState() {
   if (journey.state === JourneyState.ARRIVED) return "Your appointment is recognised. The next verified step is simply registration at Counter 3.";
   return "This page turns verified visit updates into a clear next action. It does not provide medical advice or make clinical decisions.";
 }
-function render() { renderPatient(); renderStaff(); }
+function render() {
+  renderPatient();
+  renderStaff();
+  setConnectionStatus();
+}
 
 document.querySelector("#patient-action").addEventListener("click", () => action(EventType.PATIENT_ARRIVED, { description: "Ravi arrived at the hospital" }));
 document.querySelector("#start-appointment").addEventListener("click", () => switchView("patient"));
@@ -87,15 +129,34 @@ document.querySelector("#staff-controls").addEventListener("click", (event) => {
   if (!type) return;
   const extra = type === EventType.ROOM_CHANGED ? { room: "204", description: "Consultation room changed from 202 to 204" } :
     type === EventType.CHECKED_IN ? { queueAhead: 3, description: "Registration completed — Ravi joined the queue" } : {};
-  alertAcknowledged = false; action(type, extra);
+  alertAcknowledged = false;
+  action(type, extra);
 });
-document.querySelector("#reset-demo").addEventListener("click", () => { journey = structuredClone(initialJourney); alertAcknowledged = false; render(); switchView("start"); });
+document.querySelector("#reset-demo").addEventListener("click", () => {
+  journey = structuredClone(initialJourney);
+  alertAcknowledged = false;
+  saveJourney();
+  render();
+  switchView("start");
+});
 document.querySelector("#explain-action").addEventListener("click", () => { const detail = document.querySelector("#explanation"); detail.textContent = explanationForState(); detail.hidden = !detail.hidden; });
 document.querySelector("#journey-alert").addEventListener("click", (event) => { if (event.target.closest("#ack-alert")) { alertAcknowledged = true; render(); } });
+
+window.addEventListener("online", () => {
+  setConnectionStatus();
+  render();
+});
+window.addEventListener("offline", () => {
+  setConnectionStatus();
+  render();
+});
+
 function switchView(view) {
   document.querySelectorAll(".view-tab, .view").forEach(el => el.classList.remove("active"));
   const tab = document.querySelector(`.view-tab[data-view="${view}"]`); if (tab) tab.classList.add("active");
   document.querySelector(`#${view}-view`).classList.add("active");
 }
 document.querySelectorAll(".view-tab").forEach(button => button.addEventListener("click", () => switchView(button.dataset.view)));
+
+saveJourney();
 render();
