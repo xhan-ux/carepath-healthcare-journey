@@ -16,7 +16,7 @@
           <span class="brand-mark">+</span>CarePath
         </a>
 
-        <span class="demo-chip">Synthetic demo</span>
+        <span class="demo-chip">Synthetic demo · 2-device sync</span>
 
         <nav aria-label="Demo views">
           <button class="view-tab active" data-view="patient">Patient journey</button>
@@ -25,7 +25,6 @@
         </nav>
       </header>
 
-      <!-- LOGIN / ROLE SELECTION -->
       <section id="start-view" class="view active start-view" aria-label="CarePath sign in">
         <div class="start-copy">
           <p class="eyebrow">CITY GOVERNMENT HOSPITAL · SYNTHETIC PROTOTYPE</p>
@@ -47,7 +46,7 @@
           <div class="login-panel-heading">
             <p class="eyebrow">WELCOME TO CAREPATH</p>
             <h2>Choose your view</h2>
-            <p>Use a different demo login on the patient device and the staff device.</p>
+            <p>Use the patient login on the laptop and the staff login on the phone. Both devices share the same synthetic journey.</p>
           </div>
 
           <div class="role-switch" role="tablist" aria-label="Choose account type">
@@ -81,7 +80,6 @@
         </aside>
       </section>
 
-      <!-- PATIENT VIEW -->
       <section id="patient-view" class="view" aria-label="Patient journey">
         <div class="patient-heading">
           <p class="eyebrow">TODAY'S VISIT</p>
@@ -94,7 +92,7 @@
             <span id="status-dot" class="status-dot"></span>
             <span id="status-label">APPOINTMENT CONFIRMED</span>
             <span id="last-updated">Updated 10:12 AM</span>
-            <span id="connection-status" class="connection-status" aria-live="polite">Live</span>
+            <span id="connection-status" class="connection-status" aria-live="polite">Waiting for sync</span>
           </div>
 
           <div class="primary-status">
@@ -115,7 +113,7 @@
           <button id="patient-action" class="primary-action" type="button">I’m at the hospital <span>→</span></button>
           <button id="explain-action" class="explain-action" type="button">✦ Explain this simply</button>
           <p id="explanation" class="explanation" hidden></p>
-          <p class="supporting-note">Appointment ID: DEMO-042 · This is synthetic information for a prototype.</p>
+          <p class="supporting-note">Appointment ID: DEMO-042 · Synthetic information · Live state shared with the staff device.</p>
         </article>
 
         <section class="timeline-section">
@@ -124,12 +122,11 @@
         </section>
       </section>
 
-      <!-- STAFF VIEW -->
       <section id="staff-view" class="view" aria-label="Staff simulator">
         <div class="staff-heading">
           <p class="eyebrow">CITY GOVERNMENT HOSPITAL · SYNTHETIC OPERATIONS VIEW</p>
           <h1>Orthopaedics desk</h1>
-          <p>Use the controls below to move Ravi’s journey forward.</p>
+          <p>Use the controls below to move Ravi’s journey forward. The patient device updates in real time.</p>
         </div>
 
         <div class="staff-layout">
@@ -155,7 +152,7 @@
             <div id="staff-controls" class="control-list"></div>
 
             <div class="simulated-sms">
-              <p class="eyebrow">SIMULATED SMS</p>
+              <p class="eyebrow">SIMULATED SMS FALLBACK</p>
               <p id="sms-preview">CAREPATH: Appointment confirmed. Bring your appointment ID.</p>
             </div>
 
@@ -163,10 +160,10 @@
           </article>
         </div>
 
-        <p class="staff-disclaimer">No real patient data, hospital systems, messaging, or clinical decisions are involved.</p>
+        <p class="staff-disclaimer">No real patient data, hospital systems, messaging, or clinical decisions are involved. SMS is simulated for the prototype.</p>
       </section>
     </main>
 
-    <script type="module" src="src/app.js"></script>
+    <script type="module" src="src/app-realtime.js"></script>
   </body>
 </html>
