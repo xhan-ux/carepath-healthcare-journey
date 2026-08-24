@@ -11,7 +11,6 @@
 
   <body>
     <main class="app-shell">
-
       <header class="topbar">
         <a class="brand" href="#patient" aria-label="CarePath home">
           <span class="brand-mark">+</span>CarePath
@@ -20,343 +19,154 @@
         <span class="demo-chip">Synthetic demo</span>
 
         <nav aria-label="Demo views">
-          <button class="view-tab active" data-view="patient">
-            Patient journey
-          </button>
-
-          <button class="view-tab" data-view="staff">
-            Staff simulator
-          </button>
+          <button class="view-tab active" data-view="patient">Patient journey</button>
+          <button class="view-tab" data-view="staff">Staff simulator</button>
+          <button id="logout-button" class="logout-button" type="button" hidden>Log out</button>
         </nav>
       </header>
 
-
-      <!-- START VIEW -->
-      <section
-        id="start-view"
-        class="view active start-view"
-        aria-label="Start your visit"
-      >
+      <!-- LOGIN / ROLE SELECTION -->
+      <section id="start-view" class="view active start-view" aria-label="CarePath sign in">
         <div class="start-copy">
-          <p class="eyebrow">
-            CITY GOVERNMENT HOSPITAL · SYNTHETIC PROTOTYPE
-          </p>
-
-          <h1>
-            Your visit,<br />
-            <em>made clear.</em>
-          </h1>
-
+          <p class="eyebrow">CITY GOVERNMENT HOSPITAL · SYNTHETIC PROTOTYPE</p>
+          <h1>Your visit,<br /><em>made clear.</em></h1>
           <p>
-            CarePath turns the hospital’s verified visit updates into one
-            simple answer: what do I do next?
+            CarePath turns the hospital’s verified visit updates into one simple answer:
+            what do I do next?
           </p>
 
-          <div class="start-actions">
-            <button id="start-appointment" class="primary-action">
-              I already have an appointment
-              <span>→</span>
-            </button>
-
-            <button class="secondary-action" disabled>
-              I need help starting
-              <small>Coming next</small>
-            </button>
+          <div class="role-points">
+            <div><strong>Patient</strong><span>Follow your visit, step by step.</span></div>
+            <div><strong>Staff</strong><span>Move the journey forward from the hospital side.</span></div>
           </div>
 
-          <p class="privacy-note">
-            No login. No medical advice. Synthetic demo data only.
-          </p>
+          <p class="privacy-note">Demo login only · No real accounts · No medical advice.</p>
         </div>
 
-        <aside class="start-preview">
-          <div class="preview-top">
-            <span>YOUR VISIT</span>
-            <span class="online-dot">Live updates</span>
+        <aside class="login-panel" aria-label="Sign in">
+          <div class="login-panel-heading">
+            <p class="eyebrow">WELCOME TO CAREPATH</p>
+            <h2>Choose your view</h2>
+            <p>Use a different demo login on the patient device and the staff device.</p>
           </div>
 
-          <p class="eyebrow">NOW</p>
-
-          <h2>Appointment confirmed</h2>
-
-          <div class="preview-line">
-            <span>NEXT</span>
-            <strong>Arrive at hospital</strong>
+          <div class="role-switch" role="tablist" aria-label="Choose account type">
+            <button id="patient-role" class="role-tab active" type="button" role="tab" aria-selected="true">Patient</button>
+            <button id="staff-role" class="role-tab" type="button" role="tab" aria-selected="false">Staff</button>
           </div>
 
-          <div class="preview-line">
-            <span>WHERE</span>
-            <strong>OPD Block A</strong>
-          </div>
+          <form id="patient-login-form" class="login-form" novalidate>
+            <label for="patient-mobile">Mobile number</label>
+            <input id="patient-mobile" name="mobile" inputmode="numeric" autocomplete="tel" placeholder="9000000000" value="9000000000" required />
 
-          <div class="mini-journey">
-            <span class="complete">✓</span>
-            <i></i>
-            <span>2</span>
-            <i></i>
-            <span>3</span>
-            <i></i>
-            <span>4</span>
-          </div>
+            <label for="patient-appointment">Appointment ID</label>
+            <input id="patient-appointment" name="appointment" autocomplete="off" placeholder="DEMO-042" value="DEMO-042" required />
+
+            <button class="primary-action" type="submit">Continue as patient <span>→</span></button>
+            <p class="demo-credentials">Demo patient: <strong>9000000000</strong> · <strong>DEMO-042</strong></p>
+          </form>
+
+          <form id="staff-login-form" class="login-form" hidden novalidate>
+            <label for="staff-id">Staff ID</label>
+            <input id="staff-id" name="staffId" autocomplete="username" placeholder="STAFF-ORTHO" value="STAFF-ORTHO" required />
+
+            <label for="staff-pin">PIN</label>
+            <input id="staff-pin" name="pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="••••" value="0420" required />
+
+            <button class="primary-action" type="submit">Continue as staff <span>→</span></button>
+            <p class="demo-credentials">Demo staff: <strong>STAFF-ORTHO</strong> · <strong>0420</strong></p>
+          </form>
+
+          <p id="login-error" class="login-error" role="alert" hidden></p>
         </aside>
       </section>
 
-
       <!-- PATIENT VIEW -->
-      <section
-        id="patient-view"
-        class="view"
-        aria-label="Patient journey"
-      >
+      <section id="patient-view" class="view" aria-label="Patient journey">
         <div class="patient-heading">
           <p class="eyebrow">TODAY'S VISIT</p>
-
           <h1>Good morning, Ravi.</h1>
-
-          <p id="appointment-line">
-            City Government Hospital · Orthopaedics · Dr. Mehta
-          </p>
+          <p id="appointment-line">City Government Hospital · Orthopaedics · Dr. Mehta</p>
         </div>
 
         <article class="journey-card" aria-live="polite">
-
           <div class="status-row">
             <span id="status-dot" class="status-dot"></span>
-
-            <span id="status-label">
-              APPOINTMENT CONFIRMED
-            </span>
-
-            <span id="last-updated">
-              Updated 10:12 AM
-            </span>
-
-            <!-- NEW: network / connection status -->
-            <span
-              id="connection-status"
-              class="connection-status"
-              aria-live="polite"
-            >
-              Live
-            </span>
+            <span id="status-label">APPOINTMENT CONFIRMED</span>
+            <span id="last-updated">Updated 10:12 AM</span>
+            <span id="connection-status" class="connection-status" aria-live="polite">Live</span>
           </div>
-
 
           <div class="primary-status">
             <p class="eyebrow">NOW</p>
-
-            <h2 id="now-title">
-              Your appointment is confirmed
-            </h2>
-
-            <p id="now-body">
-              Head to City Government Hospital when it is time to leave.
-              We’ll guide you at every step.
-            </p>
+            <h2 id="now-title">Your appointment is confirmed</h2>
+            <p id="now-body">Head to City Government Hospital when it is time to leave. We’ll guide you at every step.</p>
           </div>
 
-
-          <div
-            id="journey-alert"
-            class="journey-alert"
-            hidden
-          ></div>
-
+          <div id="journey-alert" class="journey-alert" hidden></div>
 
           <div class="journey-grid">
-
-            <section class="info-tile next">
-              <p class="eyebrow">NEXT</p>
-              <strong id="next-text">
-                Tell us when you arrive
-              </strong>
-            </section>
-
-            <section class="info-tile where">
-              <p class="eyebrow">WHERE</p>
-              <strong id="where-text">
-                City Government Hospital
-              </strong>
-            </section>
-
-            <section class="info-tile wait">
-              <p class="eyebrow">WAIT</p>
-              <strong id="wait-text">
-                No queue yet
-              </strong>
-            </section>
-
-            <section class="info-tile done">
-              <p class="eyebrow">DONE</p>
-              <strong id="done-text">
-                Your visit will appear here
-              </strong>
-            </section>
-
+            <section class="info-tile next"><p class="eyebrow">NEXT</p><strong id="next-text">Tell us when you arrive</strong></section>
+            <section class="info-tile where"><p class="eyebrow">WHERE</p><strong id="where-text">City Government Hospital</strong></section>
+            <section class="info-tile wait"><p class="eyebrow">WAIT</p><strong id="wait-text">No queue yet</strong></section>
+            <section class="info-tile done"><p class="eyebrow">DONE</p><strong id="done-text">Your visit will appear here</strong></section>
           </div>
 
-
-          <button
-            id="patient-action"
-            class="primary-action"
-          >
-            I’m at the hospital
-            <span>→</span>
-          </button>
-
-
-          <button
-            id="explain-action"
-            class="explain-action"
-          >
-            ✦ Explain this simply
-          </button>
-
-          <p
-            id="explanation"
-            class="explanation"
-            hidden
-          ></p>
-
-          <p class="supporting-note">
-            Appointment ID: DEMO-042 · This is synthetic information
-            for a prototype.
-          </p>
-
+          <button id="patient-action" class="primary-action" type="button">I’m at the hospital <span>→</span></button>
+          <button id="explain-action" class="explain-action" type="button">✦ Explain this simply</button>
+          <p id="explanation" class="explanation" hidden></p>
+          <p class="supporting-note">Appointment ID: DEMO-042 · This is synthetic information for a prototype.</p>
         </article>
-
 
         <section class="timeline-section">
           <p class="eyebrow">JOURNEY</p>
-
-          <ol
-            id="timeline"
-            class="timeline"
-          ></ol>
+          <ol id="timeline" class="timeline"></ol>
         </section>
-
       </section>
-
 
       <!-- STAFF VIEW -->
-      <section
-        id="staff-view"
-        class="view"
-        aria-label="Staff simulator"
-      >
-
+      <section id="staff-view" class="view" aria-label="Staff simulator">
         <div class="staff-heading">
-          <p class="eyebrow">
-            CITY GOVERNMENT HOSPITAL · SYNTHETIC OPERATIONS VIEW
-          </p>
-
+          <p class="eyebrow">CITY GOVERNMENT HOSPITAL · SYNTHETIC OPERATIONS VIEW</p>
           <h1>Orthopaedics desk</h1>
-
-          <p>
-            Use the controls below to move Ravi’s journey forward.
-          </p>
+          <p>Use the controls below to move Ravi’s journey forward.</p>
         </div>
-
 
         <div class="staff-layout">
-
           <article class="staff-card patient-summary">
-
             <div>
               <p class="eyebrow">PATIENT</p>
-
               <h2>Ravi Kumar</h2>
-
-              <p>
-                DEMO-042 · Dr. Mehta
-              </p>
+              <p>DEMO-042 · Dr. Mehta</p>
             </div>
 
-
-            <div
-              class="state-pill"
-              id="staff-state"
-            >
-              APPOINTMENT CONFIRMED
-            </div>
-
+            <div class="state-pill" id="staff-state">APPOINTMENT CONFIRMED</div>
 
             <dl>
-
-              <div>
-                <dt>Current room</dt>
-                <dd id="staff-room">202</dd>
-              </div>
-
-              <div>
-                <dt>Queue ahead</dt>
-                <dd id="staff-queue">—</dd>
-              </div>
-
-              <div>
-                <dt>Last update</dt>
-                <dd id="staff-updated">10:12 AM</dd>
-              </div>
-
+              <div><dt>Current room</dt><dd id="staff-room">202</dd></div>
+              <div><dt>Queue ahead</dt><dd id="staff-queue">—</dd></div>
+              <div><dt>Last update</dt><dd id="staff-updated">10:12 AM</dd></div>
             </dl>
-
           </article>
-
 
           <article class="staff-card controls">
-
-            <p class="eyebrow">
-              SIMULATE AN EVENT
-            </p>
-
+            <p class="eyebrow">SIMULATE AN EVENT</p>
             <h2>Patient flow</h2>
-
-            <div
-              id="staff-controls"
-              class="control-list"
-            ></div>
-
+            <div id="staff-controls" class="control-list"></div>
 
             <div class="simulated-sms">
-
-              <p class="eyebrow">
-                SIMULATED SMS
-              </p>
-
-              <p id="sms-preview">
-                CAREPATH: Appointment confirmed.
-                Bring your appointment ID.
-              </p>
-
+              <p class="eyebrow">SIMULATED SMS</p>
+              <p id="sms-preview">CAREPATH: Appointment confirmed. Bring your appointment ID.</p>
             </div>
 
-
-            <button
-              id="reset-demo"
-              class="reset-button"
-            >
-              Reset synthetic journey
-            </button>
-
+            <button id="reset-demo" class="reset-button" type="button">Reset synthetic journey</button>
           </article>
-
         </div>
 
-
-        <p class="staff-disclaimer">
-          No real patient data, hospital systems, messaging,
-          or clinical decisions are involved.
-        </p>
-
+        <p class="staff-disclaimer">No real patient data, hospital systems, messaging, or clinical decisions are involved.</p>
       </section>
-
     </main>
 
-
-    <script
-      type="module"
-      src="src/app.js"
-    ></script>
-
+    <script type="module" src="src/app.js"></script>
   </body>
 </html>
