@@ -4,6 +4,8 @@ export const JourneyState = Object.freeze({
   WAITING: "WAITING",
   CALLED: "CALLED",
   CONSULTATION: "CONSULTATION",
+  LAB: "LAB",
+  PHARMACY: "PHARMACY",
   COMPLETED: "COMPLETED"
 });
 
@@ -14,7 +16,9 @@ export const EventType = Object.freeze({
   ROOM_CHANGED: "ROOM_CHANGED",
   CALL_PATIENT: "CALL_PATIENT",
   START_CONSULTATION: "START_CONSULTATION",
-  COMPLETE_CONSULTATION: "COMPLETE_CONSULTATION"
+  COMPLETE_CONSULTATION: "COMPLETE_CONSULTATION",
+  COMPLETE_LAB: "COMPLETE_LAB",
+  COMPLETE_PHARMACY: "COMPLETE_PHARMACY"
 });
 
 export const initialJourney = Object.freeze({
@@ -45,7 +49,9 @@ const allowedTransitions = {
   [EventType.ROOM_CHANGED]: [JourneyState.ARRIVED, JourneyState.WAITING, JourneyState.CALLED],
   [EventType.CALL_PATIENT]: [JourneyState.WAITING],
   [EventType.START_CONSULTATION]: [JourneyState.CALLED],
-  [EventType.COMPLETE_CONSULTATION]: [JourneyState.CONSULTATION]
+  [EventType.COMPLETE_CONSULTATION]: [JourneyState.CONSULTATION],
+  [EventType.COMPLETE_LAB]: [JourneyState.LAB],
+  [EventType.COMPLETE_PHARMACY]: [JourneyState.PHARMACY]
 };
 
 function assertTransition(journey, type) {
@@ -61,7 +67,8 @@ function formatTime(date) {
 export function applyEvent(journey, event, now = new Date()) {
   assertTransition(journey, event.type);
   const lastUpdated = event.at ?? formatTime(now);
-  const next = { ...journey, lastUpdated };
+  const next = structuredClone(journey);
+  next.lastUpdated = lastUpdated;
 
   switch (event.type) {
     case EventType.PATIENT_ARRIVED:
@@ -72,14 +79,14 @@ export function applyEvent(journey, event, now = new Date()) {
       next.queueAhead = event.queueAhead ?? 3;
       break;
     case EventType.QUEUE_ADVANCED:
-      next.queueAhead = Math.max(0, journey.queueAhead - 1);
+      next.queueAhead = Math.max(0, (journey.queueAhead ?? 0) - 1);
       break;
     case EventType.ROOM_CHANGED:
       if (!event.room) throw new Error("ROOM_CHANGED needs a room.");
       next.room = event.room;
       break;
     case EventType.CALL_PATIENT:
-      if (journey.queueAhead !== 0) throw new Error("Cannot call a patient while others are ahead.");
+      if (journey.queueAhead !== 0) throw new Error("The patient is not next yet.");
       next.state = JourneyState.CALLED;
       next.queueAhead = 0;
       break;
@@ -87,8 +94,14 @@ export function applyEvent(journey, event, now = new Date()) {
       next.state = JourneyState.CONSULTATION;
       break;
     case EventType.COMPLETE_CONSULTATION:
-      next.state = JourneyState.COMPLETED;
+      next.state = JourneyState.LAB;
       next.queueAhead = null;
+      break;
+    case EventType.COMPLETE_LAB:
+      next.state = JourneyState.PHARMACY;
+      break;
+    case EventType.COMPLETE_PHARMACY:
+      next.state = JourneyState.COMPLETED;
       break;
   }
 
