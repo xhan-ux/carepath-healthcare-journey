@@ -85,15 +85,7 @@
 
   <section id="patient-view" class="view" aria-label="Patient journey">
     <div class="patient-heading"><p class="eyebrow">TODAY’S VISIT · <span id="connection-status">Local demo</span></p><h1>Good morning, Ravi.</h1><p>City Government Hospital · Orthopaedics · Dr. Mehta</p></div>
-    <article class="journey-card">
-      <div class="status-row"><span class="status-dot"></span><span id="status-label">APPOINTMENT CONFIRMED</span><span id="last-updated">Updated 10:12 AM</span></div>
-      <div class="primary-status"><p class="eyebrow">NOW</p><h2 id="now-title">Appointment confirmed</h2><p id="now-body">You’re seeing Dr. Mehta in Orthopaedics at 10:30 AM.</p></div>
-      <div id="journey-alert" class="journey-alert" hidden></div>
-      <div class="journey-grid"><div class="info-tile"><p class="eyebrow">NEXT</p><strong id="next-text">Tell us when you arrive</strong></div><div class="info-tile"><p class="eyebrow">WHERE</p><strong id="where-text">OPD Block A · Ground Floor</strong></div><div class="info-tile wait"><p class="eyebrow">WAIT</p><strong id="wait-text">No queue yet</strong></div><div class="info-tile done"><p class="eyebrow">DONE</p><strong id="done-text">Appointment confirmed</strong></div></div>
-      <button id="patient-action" class="primary-action" type="button">I’m at the hospital → <span>→</span></button>
-      <button id="explain-action" class="explain-action" type="button">✦ Explain this simply</button><p id="explanation" class="explanation" hidden></p>
-      <div class="supporting-note">Appointment ID: DEMO-042 · Synthetic information for a prototype.</div>
-    </article>
+    <article class="journey-card"><div class="status-row"><span class="status-dot"></span><span id="status-label">APPOINTMENT CONFIRMED</span><span id="last-updated">Updated 10:12 AM</span></div><div class="primary-status"><p class="eyebrow">NOW</p><h2 id="now-title">Appointment confirmed</h2><p id="now-body">You’re seeing Dr. Mehta in Orthopaedics at 10:30 AM.</p></div><div id="journey-alert" class="journey-alert" hidden></div><div class="journey-grid"><div class="info-tile"><p class="eyebrow">NEXT</p><strong id="next-text">Tell us when you arrive</strong></div><div class="info-tile"><p class="eyebrow">WHERE</p><strong id="where-text">OPD Block A · Ground Floor</strong></div><div class="info-tile wait"><p class="eyebrow">WAIT</p><strong id="wait-text">No queue yet</strong></div><div class="info-tile done"><p class="eyebrow">DONE</p><strong id="done-text">Appointment confirmed</strong></div></div><button id="patient-action" class="primary-action" type="button">I’m at the hospital → <span>→</span></button><button id="explain-action" class="explain-action" type="button">✦ Explain this simply</button><p id="explanation" class="explanation" hidden></p><div class="supporting-note">Appointment ID: DEMO-042 · Synthetic information for a prototype.</div></article>
     <section class="timeline-section"><p class="eyebrow">YOUR JOURNEY</p><ol id="timeline" class="timeline"></ol></section>
     <section class="event-log"><div><p class="eyebrow">LATEST VERIFIED EVENTS</p><h2>What changed</h2></div><ul id="patient-events"></ul></section>
   </section>
@@ -107,5 +99,6 @@
   <div id="toast" class="toast" role="status" hidden></div>
 </main>
 <script type="module" src="src/app.js"></script>
+<script type="module" src="src/navigation.js"></script>
 </body>
 </html>
