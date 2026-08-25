@@ -1,15 +1,29 @@
-import { applyEvent, canApplyEvent, EventType, initialJourney, JourneyState } from "./state.js";
+import { EventType, initialJourney, JourneyState, canApplyEvent } from "./state.js";
 
-const JOURNEY_CACHE_KEY = "carepath:journey:v2";
 const AUTH_ROLE_KEY = "carepath:demo-role:v2";
 const DEMO_PATIENT = { mobile: "9000000000", appointment: "DEMO-042" };
 const DEMO_STAFF = { id: "STAFF-ORTHO", pin: "0420" };
 
-let journey = loadCachedJourney();
-let alertAcknowledged = false;
+let journey = structuredClone(initialJourney);
 let authRole = sessionStorage.getItem(AUTH_ROLE_KEY) || null;
 let serverAvailable = false;
 let eventStream = null;
+let pending = false;
+let alertAcknowledged = false;
+let showcaseIndex = 0;
+
+const pages = [
+  ["Overview", ".hero-block"],
+  ["Start", ".start-story"],
+  ["Hospital visit", ".hospital-story"],
+  ["Any device", ".access-story"],
+  ["AI explainer", ".ai-story"],
+  ["Scale", ".scale-story"],
+  ["Try it", ".try-section"]
+];
+
+const stateStep = { APPOINTMENT_CONFIRMED: 0, ARRIVED: 1, WAITING: 2, CALLED: 3, CONSULTATION: 4, COMPLETED: 5 };
+const timelineSteps = ["Appointment", "Arrived", "Registered", "Called", "Consultation", "Complete"];
 
 const patientCopy = {
   [JourneyState.APPOINTMENT_CONFIRMED]: ["Appointment confirmed", "You’re seeing Dr. Mehta in Orthopaedics at 10:30 AM. When you reach the hospital, we’ll guide you through the next step.", "Tell us when you arrive", "OPD Block A · Ground Floor", "No queue yet", "Appointment confirmed", "I’m at the hospital →"],
@@ -20,50 +34,130 @@ const patientCopy = {
   [JourneyState.COMPLETED]: ["You’re done for today", "Your Orthopaedics consultation with Dr. Mehta is complete. There are no further steps in this synthetic visit.", "No further steps today", "City Government Hospital", "No wait", "Appointment · Registration · Consultation ✓", "Visit completed"]
 };
 
-const timelineSteps = ["Appointment confirmed", "Arrived", "Registered & waiting", "Called", "Consultation", "Completed"];
-const stateStep = { APPOINTMENT_CONFIRMED: 0, ARRIVED: 1, WAITING: 2, CALLED: 3, CONSULTATION: 4, COMPLETED: 5 };
-
-function loadCachedJourney() {
-  try { const saved = localStorage.getItem(JOURNEY_CACHE_KEY); return saved ? JSON.parse(saved) : structuredClone(initialJourney); }
-  catch { return structuredClone(initialJourney); }
+function fill(text) {
+  return text.replaceAll("{room}", journey.room).replaceAll("{token}", journey.visit.token).replaceAll("{queue}", journey.queueAhead === 0 ? "No" : journey.queueAhead ?? "No");
 }
-function saveJourney() { try { localStorage.setItem(JOURNEY_CACHE_KEY, JSON.stringify(journey)); } catch { /* optional offline cache */ } }
-function fill(template) { return template.replaceAll("{room}", journey.room).replaceAll("{token}", journey.visit.token).replaceAll("{queue}", journey.queueAhead === 0 ? "No" : journey.queueAhead); }
-function formatState(state) { return state.replaceAll("_", " "); }
 
-async function apiPost(path, body) {
-  const response = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.error || "The journey could not be updated.");
-  return payload.journey;
+function setLoginRole(role) {
+  const patient = role === "patient";
+  document.querySelector("#patient-role")?.classList.toggle("active", patient);
+  document.querySelector("#staff-role")?.classList.toggle("active", !patient);
+  document.querySelector("#patient-login-form")?.toggleAttribute("hidden", !patient);
+  document.querySelector("#staff-login-form")?.toggleAttribute("hidden", patient);
+  const error = document.querySelector("#login-error"); if (error) error.hidden = true;
+}
+
+function setAuthRole(role) {
+  authRole = role;
+  sessionStorage.setItem(AUTH_ROLE_KEY, role);
+  document.querySelector("#logout-button").hidden = false;
+  document.querySelectorAll(".view-tab").forEach((button) => { button.hidden = button.dataset.view !== role; });
+  switchView(role);
+}
+
+function logout() {
+  authRole = null;
+  sessionStorage.removeItem(AUTH_ROLE_KEY);
+  document.querySelector("#logout-button").hidden = true;
+  document.querySelectorAll(".view-tab").forEach((button) => { button.hidden = true; });
+  setLoginRole("patient");
+  switchView("start");
+}
+
+function switchView(view) {
+  if (view !== "start" && !authRole) view = "start";
+  if (view !== "start" && authRole !== view) return;
+  document.querySelectorAll(".view-tab, .view").forEach((el) => el.classList.remove("active"));
+  document.querySelector(`.view-tab[data-view="${view}"]`)?.classList.add("active");
+  document.querySelector(`#${view}-view`)?.classList.add("active");
+  window.scrollTo({ top: 0, behavior: "instant" });
+}
+
+function setupShowcasePages() {
+  const showcase = document.querySelector("#start-view");
+  if (!showcase) return;
+  pages.forEach(([name, selector], index) => {
+    const page = showcase.querySelector(selector);
+    if (!page) return;
+    page.classList.add("showcase-page");
+    page.dataset.page = String(index);
+    page.dataset.pageName = name;
+  });
+
+  const pager = document.createElement("div");
+  pager.id = "showcase-pager";
+  pager.innerHTML = `<div class="pager-copy"><span id="pager-count">01 / 07</span><strong id="pager-name">Overview</strong></div><div class="pager-steps" aria-label="Journey pages"></div><div class="pager-actions"><button id="pager-back" type="button" aria-label="Previous page">←</button><button id="pager-next" class="pager-next" type="button">Next <span>→</span></button></div>`;
+  showcase.appendChild(pager);
+  const steps = pager.querySelector(".pager-steps");
+  pages.forEach(([name], index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.page = String(index);
+    button.title = name;
+    button.setAttribute("aria-label", `Go to ${name}`);
+    steps.appendChild(button);
+    button.addEventListener("click", () => goToShowcasePage(index));
+  });
+  pager.querySelector("#pager-back").addEventListener("click", () => goToShowcasePage(showcaseIndex - 1));
+  pager.querySelector("#pager-next").addEventListener("click", () => goToShowcasePage(showcaseIndex + 1));
+  showcase.querySelectorAll("[data-scroll-to]").forEach((button) => button.removeAttribute("data-scroll-to"));
+  showcase.querySelector(".hero-button")?.addEventListener("click", () => goToShowcasePage(6));
+  renderShowcasePage();
+}
+
+function goToShowcasePage(index) {
+  showcaseIndex = Math.max(0, Math.min(pages.length - 1, index));
+  renderShowcasePage();
+}
+
+function renderShowcasePage() {
+  const showcase = document.querySelector("#start-view");
+  if (!showcase) return;
+  showcase.querySelectorAll(".showcase-page").forEach((page) => page.classList.toggle("active-page", Number(page.dataset.page) === showcaseIndex));
+  const count = document.querySelector("#pager-count");
+  const name = document.querySelector("#pager-name");
+  const back = document.querySelector("#pager-back");
+  const next = document.querySelector("#pager-next");
+  if (count) count.textContent = `${String(showcaseIndex + 1).padStart(2, "0")} / ${String(pages.length).padStart(2, "0")}`;
+  if (name) name.textContent = pages[showcaseIndex][0];
+  if (back) back.disabled = showcaseIndex === 0;
+  if (next) next.innerHTML = showcaseIndex === pages.length - 1 ? `Start journey <span>→</span>` : `Next <span>→</span>`;
+  document.querySelectorAll(".pager-steps button").forEach((button) => button.classList.toggle("active", Number(button.dataset.page) === showcaseIndex));
+}
+
+async function api(path, options = {}) {
+  const response = await fetch(path, { cache: "no-store", headers: { "Content-Type": "application/json", ...(options.headers || {}) }, ...options });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
+  return data;
+}
+
+async function connectToJourneyServer() {
+  if (!window.fetch || !window.EventSource || !location.protocol.startsWith("http")) return;
+  try {
+    const payload = await api("/api/state");
+    if (payload.journey) journey = payload.journey;
+    serverAvailable = true;
+    render();
+    eventStream?.close();
+    eventStream = new EventSource("/api/events");
+    eventStream.addEventListener("journey", (event) => { const data = JSON.parse(event.data); if (data.journey) { journey = data.journey; alertAcknowledged = false; render(); } });
+    eventStream.addEventListener("reset", (event) => { const data = JSON.parse(event.data); if (data.journey) { journey = data.journey; alertAcknowledged = false; render(); } });
+    eventStream.onerror = () => { serverAvailable = false; render(); };
+  } catch { serverAvailable = false; render(); }
 }
 
 async function action(type, extra = {}) {
-  alertAcknowledged = false;
-  try {
-    journey = serverAvailable ? await apiPost("/api/event", { role: authRole, type, ...extra }) : applyEvent(journey, { type, ...extra });
-    saveJourney(); render();
-  } catch (error) { showToast(error.message || "Could not update the journey."); }
-}
-
-async function resetJourney() {
-  try {
-    journey = serverAvailable ? await apiPost("/api/reset", { role: "staff" }) : structuredClone(initialJourney);
-    alertAcknowledged = false; saveJourney(); render();
-  } catch (error) { showToast(error.message || "Could not reset the journey."); }
-}
-
-function setConnectionStatus() {
-  document.querySelectorAll("#connection-status").forEach((element) => {
-    const text = !navigator.onLine ? `Offline · Last known ${journey.lastUpdated}` : serverAvailable ? "Live sync · 2 devices" : "Local demo · start server for 2 devices";
-    element.textContent = text;
-    element.dataset.status = !navigator.onLine ? "offline" : serverAvailable ? "live" : "local";
-  });
+  if (!serverAvailable || pending || !authRole) return;
+  pending = true; render();
+  try { const data = await api("/api/event", { method: "POST", body: JSON.stringify({ type, ...extra, role: authRole }) }); if (data.journey) journey = data.journey; }
+  catch (error) { window.alert(error.message); }
+  finally { pending = false; render(); }
 }
 
 function renderPatient() {
   const copy = patientCopy[journey.state].map(fill);
-  document.querySelector("#status-label").textContent = formatState(journey.state);
+  document.querySelector("#status-label").textContent = journey.state.replaceAll("_", " ");
   document.querySelector("#last-updated").textContent = `Updated ${journey.lastUpdated}`;
   document.querySelector("#now-title").textContent = copy[0];
   document.querySelector("#now-body").textContent = copy[1];
@@ -72,131 +166,65 @@ function renderPatient() {
   document.querySelector("#wait-text").textContent = copy[4];
   document.querySelector("#done-text").textContent = copy[5];
   const button = document.querySelector("#patient-action");
-  button.textContent = copy[6]; button.disabled = journey.state !== JourneyState.APPOINTMENT_CONFIRMED; button.hidden = journey.state === JourneyState.COMPLETED;
-  const latestEvent = journey.events.at(-1);
+  button.textContent = pending ? "Sending update…" : copy[6];
+  button.disabled = journey.state !== JourneyState.APPOINTMENT_CONFIRMED || pending || !serverAvailable;
+  const latest = journey.events?.at(-1);
   const alert = document.querySelector("#journey-alert");
-  const needsAlert = latestEvent?.type === EventType.ROOM_CHANGED || latestEvent?.type === EventType.CALL_PATIENT;
-  alert.hidden = !needsAlert || alertAcknowledged;
-  if (needsAlert && !alertAcknowledged) {
-    const isRoomChange = latestEvent.type === EventType.ROOM_CHANGED;
-    alert.innerHTML = `<div><span class="alert-icon">${isRoomChange ? "↗" : "!"}</span><div><p class="eyebrow">${isRoomChange ? "YOUR NEXT STEP CHANGED" : "YOUR TURN"}</p><strong>${isRoomChange ? `Your consultation is now in Room ${journey.room}` : `Token ${journey.visit.token}, please go to Room ${journey.room}`}</strong><p>${isRoomChange ? "Keep waiting near Orthopaedics. We’ll let you know when you’re called." : "Please proceed now."}</p></div></div><button id="ack-alert" type="button">Got it</button>`;
+  const needs = latest?.type === EventType.ROOM_CHANGED || latest?.type === EventType.CALL_PATIENT;
+  alert.hidden = !needs || alertAcknowledged;
+  if (needs && !alertAcknowledged) {
+    const roomChange = latest.type === EventType.ROOM_CHANGED;
+    alert.innerHTML = `<div><span class="alert-icon">${roomChange ? "↗" : "!"}</span><div><p class="eyebrow">${roomChange ? "YOUR NEXT STEP CHANGED" : "YOUR TURN"}</p><strong>${roomChange ? `Your consultation is now in Room ${journey.room}` : `Token ${journey.visit.token}, please go to Room ${journey.room}`}</strong><p>${roomChange ? "Keep waiting near Orthopaedics. We’ll let you know when you’re called." : "Please proceed now."}</p></div></div><button id="ack-alert" type="button">Got it</button>`;
   }
-  document.querySelector("#timeline").innerHTML = timelineSteps.map((step, index) => `<li class="${index <= stateStep[journey.state] ? "reached" : ""} ${index === stateStep[journey.state] ? "current" : ""}"><span>${index < stateStep[journey.state] ? "✓" : index + 1}</span>${step}</li>`).join("");
-  renderEventFeed("patient-events");
+  document.querySelector("#timeline").innerHTML = timelineSteps.map((step, i) => `<li class="${i <= stateStep[journey.state] ? "reached" : ""} ${i === stateStep[journey.state] ? "current" : ""}"><span>${i < stateStep[journey.state] ? "✓" : i + 1}</span>${step}</li>`).join("");
 }
 
 function control(label, type, enabled) { return `<button class="sim-control" data-event="${type}" type="button" ${enabled ? "" : "disabled"}>${label}<span>${enabled ? "→" : "—"}</span></button>`; }
+
 function renderStaff() {
-  document.querySelector("#staff-state").textContent = formatState(journey.state);
+  document.querySelector("#staff-state").textContent = journey.state.replaceAll("_", " ");
   document.querySelector("#staff-room").textContent = journey.room;
   document.querySelector("#staff-queue").textContent = journey.queueAhead ?? "—";
   document.querySelector("#staff-updated").textContent = journey.lastUpdated;
-  document.querySelector("#sms-preview").textContent = smsForState();
+  document.querySelector("#sms-preview").textContent = journey.state === JourneyState.WAITING ? `CAREPATH: Registration complete. Token ${journey.visit.token}. Orthopaedics, Room ${journey.room}. ${journey.queueAhead} ahead.` : journey.state === JourneyState.CALLED ? `CAREPATH: Your turn. Token ${journey.visit.token}, go to Room ${journey.room} now.` : "CAREPATH: Appointment confirmed. Bring your appointment ID to OPD Block A.";
+  const enabled = serverAvailable && !pending;
   document.querySelector("#staff-controls").innerHTML = [
-    control("Register / check in patient", EventType.CHECKED_IN, canApplyEvent(journey, EventType.CHECKED_IN)),
-    control("Advance queue", EventType.QUEUE_ADVANCED, canApplyEvent(journey, EventType.QUEUE_ADVANCED) && journey.queueAhead > 0),
-    control("Move consultation room 202 → 204", EventType.ROOM_CHANGED, canApplyEvent(journey, EventType.ROOM_CHANGED) && journey.room === "202"),
-    control("Call patient", EventType.CALL_PATIENT, canApplyEvent(journey, EventType.CALL_PATIENT)),
-    control("Start consultation", EventType.START_CONSULTATION, canApplyEvent(journey, EventType.START_CONSULTATION)),
-    control("Complete consultation", EventType.COMPLETE_CONSULTATION, canApplyEvent(journey, EventType.COMPLETE_CONSULTATION))
+    control("Register / check in patient", EventType.CHECKED_IN, enabled && canApplyEvent(journey, EventType.CHECKED_IN)),
+    control("Advance queue", EventType.QUEUE_ADVANCED, enabled && canApplyEvent(journey, EventType.QUEUE_ADVANCED) && journey.queueAhead > 0),
+    control("Move consultation room 202 → 204", EventType.ROOM_CHANGED, enabled && canApplyEvent(journey, EventType.ROOM_CHANGED) && journey.room === "202"),
+    control("Call patient", EventType.CALL_PATIENT, enabled && canApplyEvent(journey, EventType.CALL_PATIENT)),
+    control("Start consultation", EventType.START_CONSULTATION, enabled && canApplyEvent(journey, EventType.START_CONSULTATION)),
+    control("Complete consultation", EventType.COMPLETE_CONSULTATION, enabled && canApplyEvent(journey, EventType.COMPLETE_CONSULTATION))
   ].join("");
-  renderEventFeed("staff-events");
-}
-function renderEventFeed(id) {
-  const element = document.querySelector(`#${id}`); if (!element) return;
-  const events = journey.events.slice(-4).reverse();
-  element.innerHTML = events.length ? events.map((event) => `<li><span>${event.at}</span><strong>${event.description}</strong></li>`).join("") : "<li><span>Ready</span><strong>Waiting for the first journey event.</strong></li>";
-}
-function smsForState() {
-  const room = journey.room;
-  if (journey.state === JourneyState.WAITING) return `CAREPATH: Registration complete. Token ${journey.visit.token}. Orthopaedics, Room ${room}. ${journey.queueAhead} ahead. Updated ${journey.lastUpdated}.`;
-  if (journey.state === JourneyState.CALLED) return `CAREPATH: Your turn. Token ${journey.visit.token}, go to Orthopaedics Room ${room} now.`;
-  if (journey.state === JourneyState.CONSULTATION) return `CAREPATH: Consultation in progress. Room ${room}.`;
-  if (journey.state === JourneyState.COMPLETED) return "CAREPATH: Your Orthopaedics visit is complete. Thank you.";
-  if (journey.events.some((event) => event.type === EventType.ROOM_CHANGED)) return `CAREPATH: Your room changed. Please go to Room ${room}.`;
-  return "CAREPATH: Appointment confirmed. Bring your appointment ID to OPD Block A.";
-}
-function explanationForState() {
-  if (journey.state === JourneyState.WAITING) return `Your registration is done. Your token is ${journey.visit.token}; ${journey.queueAhead} people are currently ahead. CarePath shows the last verified update instead of guessing a wait time.`;
-  if (journey.state === JourneyState.CALLED) return `The hospital system has marked your token as called. Go directly to Room ${journey.room}.`;
-  if (journey.state === JourneyState.ARRIVED) return "Your appointment is recognised. The next verified step is registration at Counter 3.";
-  if (journey.state === JourneyState.COMPLETED) return "This synthetic visit is complete. There are no additional steps in today's demo.";
-  return "CarePath turns verified visit updates into a clear next action. It does not provide medical advice or make clinical decisions.";
 }
 
-function setLoginRole(role) {
-  const isPatient = role === "patient";
-  document.querySelector("#patient-role").classList.toggle("active", isPatient);
-  document.querySelector("#staff-role").classList.toggle("active", !isPatient);
-  document.querySelector("#patient-role").setAttribute("aria-selected", String(isPatient));
-  document.querySelector("#staff-role").setAttribute("aria-selected", String(!isPatient));
-  document.querySelector("#patient-login-form").hidden = !isPatient;
-  document.querySelector("#staff-login-form").hidden = isPatient;
-  document.querySelector("#login-error").hidden = true;
-}
-function setAuthRole(role) {
-  authRole = role; sessionStorage.setItem(AUTH_ROLE_KEY, role);
-  document.querySelector("#logout-button").hidden = false;
-  document.querySelectorAll(".view-tab").forEach((button) => { button.hidden = button.dataset.view !== role; });
-  document.querySelector("#start-view").classList.remove("active"); switchView(role);
-}
-function logout() {
-  authRole = null; sessionStorage.removeItem(AUTH_ROLE_KEY);
-  document.querySelector("#logout-button").hidden = true;
-  document.querySelectorAll(".view-tab").forEach((button) => { button.hidden = true; });
-  setLoginRole("patient"); switchView("start");
-}
-function showLoginError(message) { const error = document.querySelector("#login-error"); error.textContent = message; error.hidden = false; }
-function showToast(message) { const toast = document.querySelector("#toast"); if (!toast) return; toast.textContent = message; toast.hidden = false; clearTimeout(showToast.timer); showToast.timer = setTimeout(() => { toast.hidden = true; }, 3200); }
-function renderAuthChrome() {
-  const logoutButton = document.querySelector("#logout-button"); const tabs = document.querySelectorAll(".view-tab");
-  if (!authRole) { logoutButton.hidden = true; tabs.forEach((button) => { button.hidden = true; }); return; }
-  logoutButton.hidden = false; tabs.forEach((button) => { button.hidden = button.dataset.view !== authRole; });
-}
-function render() { renderPatient(); renderStaff(); setConnectionStatus(); renderAuthChrome(); }
-function switchView(view) {
-  if (view !== "start" && !authRole) view = "start";
-  if (view !== "start" && authRole !== view) return;
-  document.querySelectorAll(".view-tab, .view").forEach((el) => el.classList.remove("active"));
-  const tab = document.querySelector(`.view-tab[data-view="${view}"]`); if (tab) tab.classList.add("active");
-  document.querySelector(`#${view}-view`).classList.add("active");
+function render() {
+  renderPatient(); renderStaff();
+  const status = document.querySelector("#connection-status");
+  if (status) status.textContent = !navigator.onLine ? "Offline" : serverAvailable ? "Live sync" : "Waiting for sync";
+  const logoutButton = document.querySelector("#logout-button");
+  if (!authRole) { logoutButton.hidden = true; document.querySelectorAll(".view-tab").forEach((b) => b.hidden = true); }
+  else { logoutButton.hidden = false; document.querySelectorAll(".view-tab").forEach((b) => b.hidden = b.dataset.view !== authRole); }
 }
 
-async function connectToJourneyServer() {
-  if (!window.fetch || !window.EventSource || !location.protocol.startsWith("http")) return;
-  try {
-    const response = await fetch("/api/state", { cache: "no-store" });
-    if (!response.ok) throw new Error("Journey API unavailable");
-    const payload = await response.json(); if (payload.journey) { journey = payload.journey; saveJourney(); }
-    serverAvailable = true; render(); eventStream?.close(); eventStream = new EventSource("/api/events");
-    eventStream.addEventListener("journey", (event) => { const payload = JSON.parse(event.data); if (payload.journey) { journey = payload.journey; saveJourney(); alertAcknowledged = false; render(); } });
-    eventStream.addEventListener("reset", (event) => { const payload = JSON.parse(event.data); if (payload.journey) { journey = payload.journey; saveJourney(); alertAcknowledged = false; render(); } });
-    eventStream.onerror = () => { serverAvailable = false; render(); };
-  } catch { serverAvailable = false; render(); }
+function bind() {
+  document.querySelector("#patient-role").addEventListener("click", () => setLoginRole("patient"));
+  document.querySelector("#staff-role").addEventListener("click", () => setLoginRole("staff"));
+  document.querySelector("#patient-login-form").addEventListener("submit", (event) => { event.preventDefault(); const mobile = document.querySelector("#patient-mobile").value.trim(); const appointment = document.querySelector("#patient-appointment").value.trim().toUpperCase(); if (mobile !== DEMO_PATIENT.mobile || appointment !== DEMO_PATIENT.appointment) { const e = document.querySelector("#login-error"); e.textContent = "For this synthetic demo, use 9000000000 and DEMO-042."; e.hidden = false; return; } setAuthRole("patient"); });
+  document.querySelector("#staff-login-form").addEventListener("submit", (event) => { event.preventDefault(); const id = document.querySelector("#staff-id").value.trim().toUpperCase(); const pin = document.querySelector("#staff-pin").value.trim(); if (id !== DEMO_STAFF.id || pin !== DEMO_STAFF.pin) { const e = document.querySelector("#login-error"); e.textContent = "For this synthetic demo, use STAFF-ORTHO and PIN 0420."; e.hidden = false; return; } setAuthRole("staff"); });
+  document.querySelector("#patient-action").addEventListener("click", () => action(EventType.PATIENT_ARRIVED, { description: "Ravi arrived at the hospital" }));
+  document.querySelector("#staff-controls").addEventListener("click", (event) => { if (authRole !== "staff") return; const type = event.target.closest("button")?.dataset.event; if (!type) return; const extra = type === EventType.ROOM_CHANGED ? { room: "204", description: "Consultation room changed from 202 to 204" } : type === EventType.CHECKED_IN ? { queueAhead: 3, description: "Registration completed — Ravi joined the queue" } : type === EventType.QUEUE_ADVANCED ? { description: `Queue advanced — ${Math.max(0, journey.queueAhead - 1)} patient(s) ahead` } : {}; action(type, extra); });
+  document.querySelector("#explain-action").addEventListener("click", () => { const detail = document.querySelector("#explanation"); detail.textContent = journey.state === JourneyState.WAITING ? `Your registration is done. Token ${journey.visit.token}; ${journey.queueAhead} people are currently ahead.` : journey.state === JourneyState.CALLED ? `Your token has been called. Go directly to Room ${journey.room}.` : "CarePath turns verified visit updates into one clear next action. It does not provide medical advice."; detail.hidden = !detail.hidden; });
+  document.querySelector("#journey-alert").addEventListener("click", (event) => { if (event.target.closest("#ack-alert")) { alertAcknowledged = true; render(); } });
+  document.querySelectorAll(".view-tab").forEach((button) => button.addEventListener("click", () => switchView(button.dataset.view)));
+  document.querySelector("#logout-button").addEventListener("click", logout);
+  document.addEventListener("keydown", (event) => { if (!document.querySelector("#start-view").classList.contains("active")) return; if (event.key === "ArrowRight") goToShowcasePage(showcaseIndex + 1); if (event.key === "ArrowLeft") goToShowcasePage(showcaseIndex - 1); });
+  window.addEventListener("online", connectToJourneyServer); window.addEventListener("offline", render);
 }
 
-document.querySelector("#patient-role").addEventListener("click", () => setLoginRole("patient"));
-document.querySelector("#staff-role").addEventListener("click", () => setLoginRole("staff"));
-document.querySelector("#patient-login-form").addEventListener("submit", (event) => {
-  event.preventDefault(); const mobile = document.querySelector("#patient-mobile").value.trim(); const appointment = document.querySelector("#patient-appointment").value.trim().toUpperCase();
-  if (mobile !== DEMO_PATIENT.mobile || appointment !== DEMO_PATIENT.appointment) { showLoginError("For this synthetic demo, use 9000000000 and DEMO-042."); return; } setAuthRole("patient");
-});
-document.querySelector("#staff-login-form").addEventListener("submit", (event) => {
-  event.preventDefault(); const staffId = document.querySelector("#staff-id").value.trim().toUpperCase(); const pin = document.querySelector("#staff-pin").value.trim();
-  if (staffId !== DEMO_STAFF.id || pin !== DEMO_STAFF.pin) { showLoginError("For this synthetic demo, use STAFF-ORTHO and PIN 0420."); return; } setAuthRole("staff");
-});
-document.querySelector("#patient-action").addEventListener("click", () => { if (authRole === "patient") action(EventType.PATIENT_ARRIVED, { description: "Ravi arrived at the hospital" }); });
-document.querySelector("#staff-controls").addEventListener("click", (event) => {
-  if (authRole !== "staff") return; const type = event.target.closest("button")?.dataset.event; if (!type) return;
-  const extra = type === EventType.ROOM_CHANGED ? { room: "204", description: "Consultation room changed from 202 to 204" } : type === EventType.CHECKED_IN ? { queueAhead: 3, description: "Registration completed — Ravi joined the queue" } : type === EventType.QUEUE_ADVANCED ? { description: `Queue advanced — ${Math.max(0, journey.queueAhead - 1)} patient(s) ahead` } : {};
-  action(type, extra);
-});
-document.querySelector("#reset-demo").addEventListener("click", () => { if (authRole === "staff") resetJourney(); });
-document.querySelector("#explain-action").addEventListener("click", () => { if (authRole !== "patient") return; const detail = document.querySelector("#explanation"); detail.textContent = explanationForState(); detail.hidden = !detail.hidden; });
-document.querySelector("#journey-alert").addEventListener("click", (event) => { if (event.target.closest("#ack-alert")) { alertAcknowledged = true; render(); } });
-document.querySelectorAll(".view-tab").forEach((button) => button.addEventListener("click", () => switchView(button.dataset.view)));
-document.querySelector("#logout-button").addEventListener("click", logout);
-window.addEventListener("online", connectToJourneyServer); window.addEventListener("offline", render);
-document.querySelectorAll("[data-scroll-to]").forEach((button) => button.addEventListener("click", () => document.querySelector(button.dataset.scrollTo)?.scrollIntoView({ behavior: "smooth", block: "start" })));
-
-setLoginRole("patient"); render(); if (authRole) setAuthRole(authRole); else switchView("start"); connectToJourneyServer();
+setupShowcasePages();
+bind();
+setLoginRole("patient");
+render();
+if (authRole) setAuthRole(authRole); else switchView("start");
+connectToJourneyServer();
