@@ -31,5 +31,37 @@ function cpVisitRail(visit){
   const card=visit.querySelector(".visit-card,.journey-card,article");
   if(card?.parentElement)card.parentElement.insertBefore(rail,card);else visit.prepend(rail);
 }
-function cpPolish(){cpGuideEnhance();const visit=document.querySelector(".visit-page");if(visit){cpVisitRail(visit);const note=visit.querySelector(".supporting-note");if(note&&!note.dataset.cpPolished){note.textContent="Appointment ID: DEMO-042 · Synthetic information for a prototype. Staff-side events update this journey in the demo.";note.dataset.cpPolished="true";}}}
-const observer=new MutationObserver(()=>queueMicrotask(cpPolish));const app=document.querySelector("#app");if(app)observer.observe(app,{childList:true,subtree:true});window.addEventListener("hashchange",()=>setTimeout(cpPolish,0));setTimeout(cpPolish,0);
+function cpVisitArtifacts(visit){
+  if(visit.querySelector(".cp-visit-artifacts"))return;
+  const text=(visit.innerText||"").toLowerCase();
+  const hasToken=text.includes("token");
+  const hasRoom=text.includes("room");
+  const complete=text.includes("visit complete")||text.includes("journey complete")||text.includes("medicines");
+  const lab=text.includes("lab");
+  const wrap=document.createElement("section");wrap.className="cp-visit-artifacts";
+  const items=[
+    ["APPOINTMENT ID","DEMO-042","Keep this for registration and hospital check-in."],
+    ...(hasToken?[["TOKEN","42","Shown only when the hospital has registered you."]]:[]),
+    ...(hasRoom?[["ROOM","204","Follow the latest verified room shown by the hospital."]]:[]),
+    ...(lab?[["LAB / REPORT","Hospital source","CarePath does not invent results; use the hospital's report or instructions."]]:[]),
+    ...(complete?[["VISIT SUMMARY","Available after completion","A concise record of the synthetic journey, not a medical record."]]:[])
+  ];
+  wrap.innerHTML=`<div class="cp-artifacts-head"><span>YOUR VISIT DETAILS</span><b>Keep the useful things together.</b></div><div class="cp-artifact-grid">${items.map(([k,v,d])=>`<div class="cp-artifact"><span>${k}</span><strong>${v}</strong><small>${d}</small></div>`).join("")}</div>`;
+  const rail=visit.querySelector(".cp-journey-rail");
+  if(rail?.parentElement)rail.insertAdjacentElement("afterend",wrap);else visit.prepend(wrap);
+}
+function cpPolish(){
+  cpGuideEnhance();
+  const visit=document.querySelector(".visit-page");
+  if(visit){
+    cpVisitRail(visit);
+    cpVisitArtifacts(visit);
+    const note=visit.querySelector(".supporting-note");
+    if(note&&!note.dataset.cpPolished){note.textContent="Appointment ID: DEMO-042 · Synthetic information for a prototype. Staff-side events update this journey in the demo.";note.dataset.cpPolished="true";}
+  }
+}
+const observer=new MutationObserver(()=>queueMicrotask(cpPolish));
+const app=document.querySelector("#app");
+if(app)observer.observe(app,{childList:true,subtree:true});
+window.addEventListener("hashchange",()=>setTimeout(cpPolish,0));
+setTimeout(cpPolish,0);
