@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0d5c63" />
-    <title>CarePath — Healthcare Journey Demo</title>
+    <meta name="theme-color" content="#0b5f68" />
+    <title>CarePath — Public Service Journey Layer</title>
     <link rel="stylesheet" href="src/styles.css" />
     <link rel="stylesheet" href="src/overrides.css" />
   </head>
@@ -12,158 +12,45 @@
   <body>
     <main class="app-shell">
       <header class="topbar">
-        <a class="brand" href="#patient" aria-label="CarePath home">
-          <span class="brand-mark">+</span>CarePath
-        </a>
-
+        <a class="brand" href="#start" aria-label="CarePath home"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.3-9-8.6C1.4 8 3.3 4.7 6.7 4.7c2 0 3.3 1.1 4.2 2.5 1-1.4 2.3-2.5 4.3-2.5C18.7 4.7 20.6 8 19 11.4 17 15.7 12 20 12 20Z"/><path d="M8.3 11.5h7.4M12 7.8v7.4"/></svg></span>CarePath</a>
         <span class="demo-chip">Synthetic demo · 2-device sync</span>
-
-        <nav aria-label="Demo views">
-          <button class="view-tab active" data-view="patient">Patient journey</button>
-          <button class="view-tab" data-view="staff">Staff simulator</button>
-          <button id="logout-button" class="logout-button" type="button" hidden>Log out</button>
-        </nav>
+        <nav aria-label="Demo views"><button class="view-tab active" data-view="patient">Patient journey</button><button class="view-tab" data-view="staff">Staff simulator</button><button id="logout-button" class="logout-button" type="button" hidden>Log out</button></nav>
       </header>
 
-      <section id="start-view" class="view active start-view" aria-label="CarePath sign in">
-        <div class="start-copy">
-          <p class="eyebrow">CITY GOVERNMENT HOSPITAL · SYNTHETIC PROTOTYPE</p>
-          <h1>Your visit,<br /><em>made clear.</em></h1>
-          <p>
-            CarePath turns the hospital’s verified visit updates into one simple answer:
-            what do I do next?
-          </p>
-
-          <div class="role-points">
-            <div><strong>Patient</strong><span>Follow your visit, step by step.</span></div>
-            <div><strong>Staff</strong><span>Move the journey forward from the hospital side.</span></div>
-          </div>
-
-          <p class="privacy-note">Demo login only · No real accounts · No medical advice.</p>
+      <section id="start-view" class="view active start-view" aria-label="CarePath overview and demo sign in">
+        <div class="vision-hero">
+          <div class="vision-brand"><span class="vision-heart" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M24 40S7 30 7 19.4C7 11.7 12.2 7 18.2 7c3.6 0 5.8 2 7.8 5 2-3 4.2-5 7.8-5C39.8 7 45 11.7 45 19.4 45 30 24 40 24 40Z"/><path d="M17 23h14M24 16v14"/></svg></span><div><strong>Public Service Journey Layer</strong><span>The system knows. The patient shouldn't have to.</span></div></div>
+          <div class="vision-pill"><span class="line-icon"><svg viewBox="0 0 24 24"><path d="M7 3h10v18H7zM10 7h4M10 11h4M10 15h4"/></svg></span><strong>One patient journey.</strong><span>Any device.</span></div>
+          <div class="vision-pill"><span class="line-icon"><svg viewBox="0 0 24 24"><path d="M4 12h16M7 8h10M8 16h8"/></svg></span><strong>Tell us what you need.</strong><span>We'll help you understand what to do next.</span></div>
+          <div class="vision-pill guard"><span class="line-icon"><svg viewBox="0 0 24 24"><path d="m12 3 8 3v5c0 5-3.2 8.4-8 10-4.8-1.6-8-5-8-10V6l8-3Z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></svg></span><strong>We don't replace government systems.</strong><span>We help you navigate them.</span></div>
         </div>
 
-        <aside class="login-panel" aria-label="Sign in">
-          <div class="login-panel-heading">
-            <p class="eyebrow">WELCOME TO CAREPATH</p>
-            <h2>Choose your view</h2>
-            <p>Use the patient login on the laptop and the staff login on the phone. Both devices share the same synthetic journey.</p>
-          </div>
-
-          <div class="role-switch" role="tablist" aria-label="Choose account type">
-            <button id="patient-role" class="role-tab active" type="button" role="tab" aria-selected="true">Patient</button>
-            <button id="staff-role" class="role-tab" type="button" role="tab" aria-selected="false">Staff</button>
-          </div>
-
-          <form id="patient-login-form" class="login-form" novalidate>
-            <label for="patient-mobile">Mobile number</label>
-            <input id="patient-mobile" name="mobile" inputmode="numeric" autocomplete="tel" placeholder="9000000000" value="9000000000" required />
-
-            <label for="patient-appointment">Appointment ID</label>
-            <input id="patient-appointment" name="appointment" autocomplete="off" placeholder="DEMO-042" value="DEMO-042" required />
-
-            <button class="primary-action" type="submit">Continue as patient <span>→</span></button>
-            <p class="demo-credentials">Demo patient: <strong>9000000000</strong> · <strong>DEMO-042</strong></p>
-          </form>
-
-          <form id="staff-login-form" class="login-form" hidden novalidate>
-            <label for="staff-id">Staff ID</label>
-            <input id="staff-id" name="staffId" autocomplete="username" placeholder="STAFF-ORTHO" value="STAFF-ORTHO" required />
-
-            <label for="staff-pin">PIN</label>
-            <input id="staff-pin" name="pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="••••" value="0420" required />
-
-            <button class="primary-action" type="submit">Continue as staff <span>→</span></button>
-            <p class="demo-credentials">Demo staff: <strong>STAFF-ORTHO</strong> · <strong>0420</strong></p>
-          </form>
-
-          <p id="login-error" class="login-error" role="alert" hidden></p>
-        </aside>
-      </section>
-
-      <section id="patient-view" class="view" aria-label="Patient journey">
-        <div class="patient-heading">
-          <p class="eyebrow">TODAY'S VISIT</p>
-          <h1>Good morning, Ravi.</h1>
-          <p id="appointment-line">City Government Hospital · Orthopaedics · Dr. Mehta</p>
-        </div>
-
-        <article class="journey-card" aria-live="polite">
-          <div class="status-row">
-            <span id="status-dot" class="status-dot"></span>
-            <span id="status-label">APPOINTMENT CONFIRMED</span>
-            <span id="last-updated">Updated 10:12 AM</span>
-            <span id="connection-status" class="connection-status" aria-live="polite">Waiting for sync</span>
-          </div>
-
-          <div class="primary-status">
-            <p class="eyebrow">NOW</p>
-            <h2 id="now-title">Your appointment is confirmed</h2>
-            <p id="now-body">Head to City Government Hospital when it is time to leave. We’ll guide you at every step.</p>
-          </div>
-
-          <div id="journey-alert" class="journey-alert" hidden></div>
-
-          <div class="journey-grid">
-            <section class="info-tile next"><p class="eyebrow">NEXT</p><strong id="next-text">Tell us when you arrive</strong></section>
-            <section class="info-tile where"><p class="eyebrow">WHERE</p><strong id="where-text">City Government Hospital</strong></section>
-            <section class="info-tile wait"><p class="eyebrow">WAIT</p><strong id="wait-text">No queue yet</strong></section>
-            <section class="info-tile done"><p class="eyebrow">DONE</p><strong id="done-text">Your visit will appear here</strong></section>
-          </div>
-
-          <button id="patient-action" class="primary-action" type="button">I’m at the hospital <span>→</span></button>
-          <button id="explain-action" class="explain-action" type="button">✦ Explain this simply</button>
-          <p id="explanation" class="explanation" hidden></p>
-          <p class="supporting-note">Appointment ID: DEMO-042 · Synthetic information · Live state shared with the staff device.</p>
-        </article>
-
-        <section class="timeline-section">
-          <p class="eyebrow">JOURNEY</p>
-          <ol id="timeline" class="timeline"></ol>
-        </section>
-      </section>
-
-      <section id="staff-view" class="view" aria-label="Staff simulator">
-        <div class="staff-heading">
-          <p class="eyebrow">CITY GOVERNMENT HOSPITAL · SYNTHETIC OPERATIONS VIEW</p>
-          <h1>Orthopaedics desk</h1>
-          <p>Use the controls below to move Ravi’s journey forward. The patient device updates in real time.</p>
-        </div>
-
-        <div class="staff-layout">
-          <article class="staff-card patient-summary">
-            <div>
-              <p class="eyebrow">PATIENT</p>
-              <h2>Ravi Kumar</h2>
-              <p>DEMO-042 · Dr. Mehta</p>
+        <div class="vision-grid">
+          <section class="vision-panel start-panel">
+            <div class="panel-heading"><span>1.</span><div><h2>STARTING THE JOURNEY</h2><p>Tell us what you need help with.</p></div></div>
+            <div class="start-showcase">
+              <div class="phone phone-small" aria-label="Patient starting journey mockup"><div class="phone-speaker"></div><div class="phone-screen"><div class="mock-status">9:30 <span>◉ ◉</span></div><div class="mock-title"><span class="mini-heart">♥</span><span>English⌄</span></div><h3>Hi! How can we help you today?</h3><p>Choose one option or ask in your own words.</p><div class="mock-option"><span class="mock-icon">♧</span><strong>I need to see a doctor</strong><small>OPD / Appointment</small></div><div class="mock-option"><span class="mock-icon">▣</span><strong>I already have an appointment</strong><small>Track my visit</small></div><div class="mock-option"><span class="mock-icon">⌁</span><strong>I need a test</strong><small>Lab / Diagnostics</small></div><div class="mock-option"><span class="mock-icon">↗</span><strong>I have a referral</strong><small>From another doctor</small></div><div class="mock-option"><span class="mock-icon">?</span><strong>I'm not sure where to start</strong><small>Help me understand</small></div><div class="mock-input">Type or speak... <span>◉</span></div></div></div>
+              <div class="guide-column"><div class="guide-step"><strong>We help you understand where to start.</strong><div class="chat-bubble user-bubble">I need to see a doctor</div><div class="chat-bubble">Okay. To see a doctor at a government hospital, you usually need an OPD appointment.<br><br>Do you already have an appointment?</div><div class="choice-row"><span>No, I need an appointment</span><span>Yes, I already have one</span></div></div><div class="guide-step process-card"><strong>We show you the process.</strong><h3>How OPD appointment works</h3><ol><li>Verify mobile number</li><li>Select hospital</li><li>Select department</li><li>Choose available slot</li><li>Confirm appointment</li><li>Save confirmation</li></ol><button class="outline-demo" type="button" disabled>Open official service ↗</button><small>You will be redirected to the official government service to complete your appointment.</small></div></div>
+              <aside class="login-panel" aria-label="Demo sign in"><div class="login-panel-heading"><p class="eyebrow">TRY THE WORKING PROTOTYPE</p><h2>Choose your view</h2><p>Use the patient login on the laptop and the staff login on the phone. Both devices share the same synthetic journey.</p></div><div class="role-switch" role="tablist" aria-label="Choose account type"><button id="patient-role" class="role-tab active" type="button" role="tab" aria-selected="true">Patient</button><button id="staff-role" class="role-tab" type="button" role="tab" aria-selected="false">Staff</button></div><form id="patient-login-form" class="login-form" novalidate><label for="patient-mobile">Mobile number</label><input id="patient-mobile" name="mobile" inputmode="numeric" autocomplete="tel" placeholder="9000000000" value="9000000000" required /><label for="patient-appointment">Appointment ID</label><input id="patient-appointment" name="appointment" autocomplete="off" placeholder="DEMO-042" value="DEMO-042" required /><button class="primary-action" type="submit">Continue as patient <span>→</span></button><p class="demo-credentials">Demo patient: <strong>9000000000</strong> · <strong>DEMO-042</strong></p></form><form id="staff-login-form" class="login-form" hidden novalidate><label for="staff-id">Staff ID</label><input id="staff-id" name="staffId" autocomplete="username" placeholder="STAFF-ORTHO" value="STAFF-ORTHO" required /><label for="staff-pin">PIN</label><input id="staff-pin" name="pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="••••" value="0420" required /><button class="primary-action" type="submit">Continue as staff <span>→</span></button><p class="demo-credentials">Demo staff: <strong>STAFF-ORTHO</strong> · <strong>0420</strong></p></form><p id="login-error" class="login-error" role="alert" hidden></p></aside>
             </div>
+          </section>
 
-            <div class="state-pill" id="staff-state">APPOINTMENT CONFIRMED</div>
-
-            <dl>
-              <div><dt>Current room</dt><dd id="staff-room">202</dd></div>
-              <div><dt>Queue ahead</dt><dd id="staff-queue">—</dd></div>
-              <div><dt>Last update</dt><dd id="staff-updated">10:12 AM</dd></div>
-            </dl>
-          </article>
-
-          <article class="staff-card controls">
-            <p class="eyebrow">SIMULATE AN EVENT</p>
-            <h2>Patient flow</h2>
-            <div id="staff-controls" class="control-list"></div>
-
-            <div class="simulated-sms">
-              <p class="eyebrow">SIMULATED SMS FALLBACK</p>
-              <p id="sms-preview">CAREPATH: Appointment confirmed. Bring your appointment ID.</p>
-            </div>
-
-            <button id="reset-demo" class="reset-button" type="button">Reset synthetic journey</button>
-          </article>
+          <section class="vision-panel hospital-panel"><div class="panel-heading"><span>2.</span><div><h2>DURING YOUR HOSPITAL VISIT</h2><p>We turn complicated hospital information into simple next steps.</p></div></div><div class="hospital-showcase"><div class="hospital-card-mini"><div class="hospital-head"><span class="hospital-icon"><svg viewBox="0 0 24 24"><path d="M4 21V6l8-3 8 3v15M8 21v-7h8v7M10 8h4M12 6v4"/></svg></span><div><strong>City Government Hospital</strong><small>OPD Visit · 27 May 2026 · 8:00 AM</small></div><span class="refresh">↻</span></div><div class="hospital-body"><div class="journey-side-list"><div class="side-step active"><b>✓</b><span>Registration<small>Completed</small></span></div><div class="side-step"><b>2</b><span>Consultation<small>Orthopaedics<br>Your turn soon</small></span></div><div class="side-step"><b>4</b><span>Lab Test<small>Blood Test</small></span></div><div class="side-step"><b>5</b><span>Pharmacy<small>After consultation</small></span></div><div class="side-step"><b>6</b><span>Visit Complete</span></div></div><div class="now-card"><div><p class="eyebrow">NOW</p><h3>Registration complete</h3><span class="illustration-person" aria-hidden="true"><svg viewBox="0 0 90 90"><rect x="8" y="42" width="74" height="34" rx="4"/><path d="M20 42V30h50v12M30 30V19h30v11M45 10v9M39 14h12"/><circle cx="61" cy="55" r="7"/><path d="M61 62v10M55 72h12"/></svg></span></div><div class="now-facts"><div><p class="eyebrow">NEXT</p><strong>Go to<br>Orthopaedics</strong></div><div><p class="eyebrow">WHERE</p><strong>Room 204</strong></div></div></div><div class="metric-card"><p class="eyebrow">TOKEN</p><strong>42</strong><p class="eyebrow">WAIT</p><b>5 patients<br>ahead of you</b><div class="people-dots">● ● ● ● ●</div></div></div><div class="hospital-footer">ⓘ If anything changes, we'll update you here and on SMS.</div><div class="change-banner"><span>Update 10:55 AM</span><strong>Your room has changed. Please go to Room 204.</strong><button type="button" disabled>Got it</button></div></div><div class="phone phone-updates"><div class="phone-speaker"></div><div class="phone-screen"><div class="mock-status">11:10</div><h3>Updates</h3><div class="update-card"><small>10:55 AM</small><strong>Update</strong><span>Your next step changed. Please go to Room 204.</span><button disabled>View updated details</button></div><div class="update-card"><small>11:05 AM</small><strong>You are next.</strong><span>Please be ready. Room 204.</span></div><div class="update-card"><small>11:15 AM</small><span>Consultation in progress.</span></div><p class="mock-foot">We'll keep you updated.</p></div></div></div></section>
         </div>
 
-        <p class="staff-disclaimer">No real patient data, hospital systems, messaging, or clinical decisions are involved. SMS is simulated for the prototype.</p>
+        <div class="vision-lower-grid">
+          <section class="vision-panel any-device-panel"><div class="panel-heading"><span>3.</span><div><h2>ONE JOURNEY. ANY DEVICE.</h2><p>Lightweight · Low data · Works on any browser</p></div></div><div class="device-demo"><div class="phone phone-medium"><div class="phone-speaker"></div><div class="phone-screen"><div class="mock-status">10:42 AM <span>⌁</span></div><div class="device-hospital-title">▣ City Government Hospital</div><div class="device-content"><span class="tiny-check">✓</span><p class="eyebrow">NOW</p><h3>Registration complete</h3><strong>NEXT</strong><span>Orthopaedics</span><strong>WHERE</strong><span>Room 204</span><div class="two-metrics"><span>42<br><small>TOKEN</small></span><span>5<br><small>AHEAD</small></span></div></div></div></div><div class="device-notes"><span>◔ Low data<br><small>Small size</small></span><span>◉ Works offline<br><small>Last known status</small></span><span>◎ Multi-language<br><small>Built-in</small></span></div></div></section>
+          <section class="vision-panel sms-panel"><div class="panel-heading"><span> </span><div><h2>KEYPAD PHONE (SMS)</h2><p>Simple SMS updates · Works on basic phones</p></div></div><div class="sms-showcase"><div class="sms-card"><small>10:42 AM</small><strong>REGISTRATION DONE.</strong><span>NEXT: ORTHOPAEDICS<br>ROOM: 204<br>TOKEN 42<br>5 PATIENTS AHEAD.</span></div><div class="keypad-phone"><div class="keypad-screen">CAREPATH<br><span>Registration complete.</span><br>Room 204</div><div class="keypad-grid">● ● ●<br>● ● ●<br>● ● ●</div></div><div class="sms-card blue"><small>10:55 AM</small><strong>UPDATE: Your next step changed.</strong><span>Please go to<br>ROOM: 204.</span></div></div><div class="sms-card reply"><small>11:05 AM</small><strong>YOU ARE NEXT.</strong><span>Please be ready.<br>ROOM: 204.</span><hr><strong>Reply with a number:</strong><span>1. What do I do next?<br>2. Where do I go?<br>3. Repeat last message</span></div></section>
+          <section class="vision-panel assisted-panel"><div class="panel-heading"><span> </span><div><h2>NO PHONE (ASSISTED / PRINTED SLIP)</h2><p>Assisted by hospital staff or help desk</p></div></div><div class="paper-slip"><div class="paper-title">YOUR VISIT<br><strong>City Government Hospital</strong><small>27 May 2026 · 8:00 AM</small></div><div class="paper-step"><b>1</b><span>Registration<small>Completed</small></span><strong>Counter 3 ✓</strong></div><div class="paper-step"><b>2</b><span>Orthopaedics<small>Next</small></span><strong>Room 204<br>Token 42<br>5 ahead</strong></div><div class="paper-step"><b>3</b><span>Lab Test<small>After consultation</small></span><strong>Lab Counter 1</strong></div><div class="paper-step"><b>4</b><span>Pharmacy<small>After lab (if needed)</small></span><strong>Counter 2</strong></div><p>Please follow the numbers and directions.<br>For help, contact the help desk.</p></div></section>
+          <section class="vision-panel ai-panel"><div class="panel-heading"><span>4.</span><div><h2>AI ASSISTANT (EXPLAINER)</h2><p>Ask in your own words.<br>Get simple, verified answers.</p></div></div><div class="ai-chat"><div class="ai-question">What is OPD?</div><div class="ai-answer"><strong>OPD stands for Out Patient Department.</strong><p>It is where you can consult a doctor without being admitted to the hospital.</p><b>You need an OPD appointment to visit the doctor.</b></div><div class="ai-suggestions"><span>Tell me more</span><span>What should I bring?</span></div><div class="ai-input">Ask anything... <b>➤</b></div></div></section>
+        </div>
+        <div class="vision-footer-grid"><section><h3>IMPORTANT</h3><p>This is a prototype. All hospital data, queues, appointments and IDs are mock/simulated.</p></section><section><h3>WE DO NOT</h3><div class="do-not"><span>♧ Access any government systems</span><span>♙ Collect real personal data</span><span>♙ Provide medical advice or diagnosis</span><span>□ Replace official government services</span></div></section><section><h3>BUILT FOR EVERY CITIZEN</h3><div class="citizen-points"><span>▤ Low literacy<br><small>Simple language</small></span><span>⌁ Low connectivity<br><small>Works with SMS</small></span><span>◉ Elderly friendly<br><small>Large text, clear steps</small></span><span>♧ Caregivers<br><small>Share & assist</small></span><span>◎ Regional languages<br><small>Bharat-first design</small></span></div></section></div>
       </section>
+
+      <section id="patient-view" class="view" aria-label="Patient journey"><div class="patient-heading"><p class="eyebrow">TODAY'S VISIT</p><h1>Good morning, Ravi.</h1><p id="appointment-line">City Government Hospital · Orthopaedics · Dr. Mehta</p></div><article class="journey-card" aria-live="polite"><div class="status-row"><span id="status-dot" class="status-dot"></span><span id="status-label">APPOINTMENT CONFIRMED</span><span id="last-updated">Updated 10:12 AM</span><span id="connection-status" class="connection-status" aria-live="polite">Waiting for sync</span></div><div class="primary-status"><p class="eyebrow">NOW</p><h2 id="now-title">Your appointment is confirmed</h2><p id="now-body">Head to City Government Hospital when it is time to leave. We'll guide you at every step.</p></div><div id="journey-alert" class="journey-alert" hidden></div><div class="journey-grid"><section class="info-tile next"><p class="eyebrow">NEXT</p><strong id="next-text">Tell us when you arrive</strong></section><section class="info-tile where"><p class="eyebrow">WHERE</p><strong id="where-text">City Government Hospital</strong></section><section class="info-tile wait"><p class="eyebrow">WAIT</p><strong id="wait-text">No queue yet</strong></section><section class="info-tile done"><p class="eyebrow">DONE</p><strong id="done-text">Your visit will appear here</strong></section></div><button id="patient-action" class="primary-action" type="button">I'm at the hospital <span>→</span></button><button id="explain-action" class="explain-action" type="button">✦ Explain this simply</button><p id="explanation" class="explanation" hidden></p><p class="supporting-note">Appointment ID: DEMO-042 · Synthetic information · Live state shared with the staff device.</p></article><section class="timeline-section"><p class="eyebrow">JOURNEY</p><ol id="timeline" class="timeline"></ol></section></section>
+
+      <section id="staff-view" class="view" aria-label="Staff simulator"><div class="staff-heading"><p class="eyebrow">CITY GOVERNMENT HOSPITAL · SYNTHETIC OPERATIONS VIEW</p><h1>Orthopaedics desk</h1><p>Use the controls below to move Ravi's journey forward. The patient device updates in real time.</p></div><div class="staff-layout"><article class="staff-card patient-summary"><div><p class="eyebrow">PATIENT</p><h2>Ravi Kumar</h2><p>DEMO-042 · Dr. Mehta</p></div><div class="state-pill" id="staff-state">APPOINTMENT CONFIRMED</div><dl><div><dt>Current room</dt><dd id="staff-room">202</dd></div><div><dt>Queue ahead</dt><dd id="staff-queue">—</dd></div><div><dt>Last update</dt><dd id="staff-updated">10:12 AM</dd></div></dl></article><article class="staff-card controls"><p class="eyebrow">SIMULATE AN EVENT</p><h2>Patient flow</h2><div id="staff-controls" class="control-list"></div><div class="simulated-sms"><p class="eyebrow">SIMULATED SMS FALLBACK</p><p id="sms-preview">CAREPATH: Appointment confirmed. Bring your appointment ID.</p></div><button id="reset-demo" class="reset-button" type="button">Reset synthetic journey</button></article></div><p class="staff-disclaimer">No real patient data, hospital systems, messaging, or clinical decisions are involved. SMS is simulated for the prototype.</p></section>
     </main>
-
     <script type="module" src="src/app-realtime.js"></script>
   </body>
 </html>
