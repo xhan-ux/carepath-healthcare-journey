@@ -1,0 +1,3 @@
+/* Final landing-card polish: absolutely level, no rotation. */
+.start-preview{transform:none!important;rotate:none!important}
+.start-preview:before{transform:none!important;rotate:none!important;inset:-8px -8px 8px 8px!important;border-radius:27px!important;background:#dff3ed!important}
