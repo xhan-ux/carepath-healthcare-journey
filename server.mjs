@@ -65,7 +65,9 @@ function roleCanSend(role, type) {
     EventType.ROOM_CHANGED,
     EventType.CALL_PATIENT,
     EventType.START_CONSULTATION,
-    EventType.COMPLETE_CONSULTATION
+    EventType.COMPLETE_CONSULTATION,
+    EventType.COMPLETE_LAB,
+    EventType.COMPLETE_PHARMACY
   ].includes(type);
   return false;
 }
