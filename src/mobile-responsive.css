@@ -6,37 +6,20 @@
   img, svg, video, canvas { max-width:100%; }
   button, a, select, input { -webkit-tap-highlight-color:transparent; }
 
-  /* Stable shell: compact, predictable, touchable. */
-  .carepath-stable-shell {
-    height:64px; min-height:64px; padding:8px 12px; gap:8px;
-  }
+  .carepath-stable-shell { height:64px; min-height:64px; padding:8px 12px; gap:8px; }
   .carepath-stable-shell .brand { flex:0 0 auto; font-size:1rem; gap:7px; }
   .carepath-stable-shell .brand-mark { width:30px; height:30px; }
   .carepath-stable-shell .prototype-chip { display:none !important; }
-  .carepath-stable-shell .carepath-shell-nav {
-    flex:1 1 auto; min-width:0; gap:5px; justify-content:flex-end; overflow:hidden;
-  }
-  .carepath-stable-shell .shell-tool,
-  .carepath-stable-shell .shell-language select,
-  .carepath-stable-shell .icon-button {
-    min-height:40px; height:40px; border-radius:11px;
-  }
-  .carepath-stable-shell .shell-tool {
-    width:40px; min-width:40px; padding:0 !important; font-size:0 !important;
-    display:grid; place-items:center;
-  }
+  .carepath-stable-shell .carepath-shell-nav { flex:1 1 auto; min-width:0; gap:5px; justify-content:flex-end; overflow:hidden; }
+  .carepath-stable-shell .shell-tool, .carepath-stable-shell .shell-language select, .carepath-stable-shell .icon-button { min-height:40px; height:40px; border-radius:11px; }
+  .carepath-stable-shell .shell-tool { width:40px; min-width:40px; padding:0 !important; font-size:0 !important; display:grid; place-items:center; }
   .carepath-stable-shell .shell-tool span { display:none !important; }
-  .carepath-stable-shell .shell-tool::first-letter { font-size:18px; }
-  .carepath-stable-shell .shell-language select {
-    width:64px; min-width:64px; padding:0 5px; font-size:13px;
-  }
+  .carepath-stable-shell .shell-tool:first-child { font-size:18px !important; }
+  .carepath-stable-shell .shell-tool:first-child span { display:none !important; }
+  .carepath-stable-shell .shell-language select { width:64px; min-width:64px; padding:0 5px; font-size:13px; }
   .carepath-stable-shell .icon-button { width:40px; min-width:40px; padding:0; }
   .carepath-stable-shell [data-shell-auth] { min-width:0; }
-  .carepath-stable-shell [data-shell-auth] .role-chip,
-  .carepath-stable-shell [data-shell-auth] button {
-    max-width:72px; min-width:40px; overflow:hidden; white-space:nowrap;
-    text-overflow:ellipsis; min-height:40px;
-  }
+  .carepath-stable-shell [data-shell-auth] .role-chip, .carepath-stable-shell [data-shell-auth] button { max-width:72px; min-width:40px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; min-height:40px; }
 
   .page { width:100%; max-width:100%; padding:30px 16px 72px; }
   .page h1 { font-size:clamp(2.5rem,12vw,4rem); line-height:.94; overflow-wrap:anywhere; }
@@ -54,12 +37,10 @@
   .principles { grid-template-columns:1fr; }
   .principles div { border-right:0; border-bottom:1px solid var(--line); }
 
-  .choice-panel, .question-panel, .process-panel, .login-card,
-  .confirmation-card, .visit-card { border-radius:18px; box-shadow:0 12px 34px rgba(18,52,56,.08); }
+  .choice-panel, .question-panel, .process-panel, .login-card, .confirmation-card, .visit-card { border-radius:18px; box-shadow:0 12px 34px rgba(18,52,56,.08); }
   .choice-panel, .question-panel, .process-panel, .login-card { padding:14px; }
   .choice-row { grid-template-columns:30px minmax(0,1fr) 22px; padding:13px 6px; min-height:52px; }
   .choice-row b { font-size:.84rem; }
-  .segmented { grid-template-columns:1fr 1fr; }
   .segmented button, .role-tabs button { min-height:46px; }
   .input-wrap input, .login-card input { min-height:48px; font-size:16px; }
   .primary-button, .secondary-button { min-height:48px; }
@@ -86,21 +67,13 @@
   .journey-progress ol { min-width:620px; }
   .journey-mini { max-width:none; width:100%; margin-top:28px; }
 
-  /* Staff: mobile is a task console. Put the next action before the dense status cards. */
-  .cp-staff-command {
-    width:calc(100% - 12px); max-width:none; margin:8px auto 28px; border-radius:20px;
-    min-height:0; display:block; overflow:hidden;
-  }
+  /* Staff is a task console on mobile: next action first, then status, then queue. */
+  .cp-staff-command { width:calc(100% - 12px); max-width:none; margin:8px auto 28px; border-radius:20px; min-height:0; display:block; overflow:hidden; }
   .cp-staff-sidebar { padding:12px 10px; min-height:0; }
   .cp-staff-hospital { padding:4px 6px 12px; }
-  .cp-staff-sidebar nav {
-    display:flex; overflow-x:auto; gap:6px; padding-top:10px; scrollbar-width:none;
-    margin-right:-4px; padding-bottom:2px;
-  }
+  .cp-staff-sidebar nav { display:flex; overflow-x:auto; gap:6px; padding-top:10px; scrollbar-width:none; margin-right:-4px; padding-bottom:2px; }
   .cp-staff-sidebar nav::-webkit-scrollbar { display:none; }
-  .cp-staff-sidebar nav button {
-    flex:0 0 auto; min-width:82px; min-height:44px; text-align:center; padding:8px 7px;
-  }
+  .cp-staff-sidebar nav button { flex:0 0 auto; min-width:82px; min-height:44px; text-align:center; padding:8px 7px; }
   .cp-staff-sidebar nav span { display:block; margin:3px 0 0; }
   .cp-staff-main { padding:13px; min-width:0; }
   .cp-staff-top { display:block; margin-bottom:14px; }
@@ -117,40 +90,33 @@
   .cp-patient-meta { font-size:11px; }
   .cp-staff-stats { grid-template-columns:1fr 1fr; }
   .cp-staff-actions { gap:7px; }
-  .cp-staff-actions button, .cp-context-action button {
-    min-height:48px; padding:11px 12px; font-size:12px; border-radius:11px;
-  }
+  .cp-staff-actions button, .cp-context-action button { min-height:48px; padding:11px 12px; font-size:12px; border-radius:11px; }
   .cp-context-action { margin-top:10px; padding-bottom:10px; }
   .cp-context-action button { font-size:13px; }
   .cp-staff-journey { overflow:hidden; }
-  .cp-staff-rail {
-    overflow-x:auto; grid-template-columns:repeat(8,74px); gap:2px;
-    margin:16px -4px 0; padding:0 4px 8px;
-  }
+  .cp-staff-rail { overflow-x:auto; grid-template-columns:repeat(8,74px); gap:2px; margin:16px -4px 0; padding:0 4px 8px; }
   .cp-staff-rail > div { font-size:9px; }
   .cp-staff-rail small { white-space:nowrap; font-size:9px; }
   .cp-queue-preview, .cp-queue-table { overflow-x:hidden; }
-  .cp-patient-row {
-    width:100%; min-width:0; grid-template-columns:34px minmax(0,1fr) auto;
-    gap:7px; padding:12px 3px; min-height:54px;
-  }
+  .cp-patient-row { width:100%; min-width:0; grid-template-columns:34px minmax(0,1fr) auto; gap:7px; padding:12px 3px; min-height:54px; }
   .cp-patient-name { min-width:0; }
-  .cp-patient-name b { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; }
-  .cp-patient-name small { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .cp-patient-name b, .cp-patient-name small { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .cp-patient-status { max-width:82px; text-align:right; line-height:1.2; }
   .cp-patient-room { display:none; }
   .cp-section-head { display:block; margin-bottom:13px; }
   .cp-section-head > strong { display:inline-block; margin-top:9px; }
   .cp-inline-link { min-height:44px; }
 
-  .cp-ai-launcher {
-    right:12px; bottom:calc(12px + env(safe-area-inset-bottom));
-    padding:11px 15px; font-size:13px; max-width:calc(100vw - 24px);
-  }
-  .cp-ai-panel {
-    right:10px; left:10px; bottom:calc(62px + env(safe-area-inset-bottom));
-    width:auto; max-width:none; max-height:calc(100vh - 90px); border-radius:20px;
-  }
+  .cp-ai-launcher { right:12px; bottom:calc(12px + env(safe-area-inset-bottom)); padding:11px 15px; font-size:13px; max-width:calc(100vw - 24px); }
+  .cp-ai-panel { right:10px; left:10px; bottom:calc(62px + env(safe-area-inset-bottom)); width:auto; max-width:none; max-height:calc(100vh - 90px); border-radius:20px; }
+
+  .cp-runtime-recovery { min-height:calc(100vh - 64px); display:grid; place-items:center; padding:32px 18px 80px; }
+  .cp-runtime-recovery > div { width:min(620px,100%); }
+  .cp-runtime-recovery h1 { margin:0 0 18px; font-size:clamp(2.5rem,12vw,4rem); line-height:.94; letter-spacing:-.07em; }
+  .cp-runtime-recovery p:not(.eyebrow) { color:var(--muted); line-height:1.6; }
+  .cp-runtime-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:24px; }
+  .cp-runtime-actions button, .cp-runtime-actions a { min-height:48px; display:inline-flex; align-items:center; justify-content:center; padding:12px 16px; border-radius:12px; border:1px solid var(--line); background:var(--paper); color:var(--ink); font-weight:850; text-decoration:none; }
+  .cp-runtime-actions button { background:var(--teal); color:#fff; border-color:var(--teal); }
 }
 
 @media (max-width:420px) {
@@ -167,4 +133,6 @@
   .cp-staff-command { width:calc(100% - 8px); }
   .cp-staff-main { padding:10px; }
   .cp-metric-grid { grid-template-columns:1fr; }
+  .cp-runtime-actions { flex-direction:column; }
+  .cp-runtime-actions button, .cp-runtime-actions a { width:100%; }
 }
