@@ -1,5 +1,6 @@
-/* Stable global shell: rendered outside #app so route changes cannot replace it. */
-.carepath-stable-shell{position:sticky;top:0;z-index:1000;min-height:70px}
+/* Stable global shell: always visible and outside #app so route changes cannot replace it. */
+.carepath-stable-shell{display:flex!important;position:sticky;top:0;z-index:1000;min-height:70px;visibility:visible!important;opacity:1!important}
+.carepath-stable-shell[hidden]{display:none!important}
 .carepath-shell-nav{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:0}
 .shell-tool,.shell-language select{font:inherit;font-weight:700;border:1px solid #d7e4e1;background:#fff;color:#123c3f;border-radius:12px;min-height:42px;padding:0 13px;cursor:pointer}
 .shell-tool:hover,.shell-language select:hover{border-color:#0c8084;background:#f5fbfa}
