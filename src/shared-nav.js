@@ -1,7 +1,7 @@
 /* CarePath shared navigation.
    Owns only the visible navbar shell + language persistence.
-   Accessibility and read-aloud behavior stay in accessibility.js so there
-   is exactly one click handler for each feature. */
+   No MutationObserver: observing the whole body caused an infinite render loop.
+   Accessibility and read-aloud behavior stay in accessibility.js. */
 (function(){
   const LANG_KEY="carepath:language:v1";
   const A11Y_LANG_KEY="carepath:language:v3";
@@ -28,6 +28,16 @@
     </div>`;
   }
 
+  function syncPanel(lang){
+    const p=PANEL[lang];
+    const panel=document.querySelector(".accessibility-panel");
+    if(!panel||!p)return;
+    const set=(sel,value)=>{const el=panel.querySelector(sel);if(el&&el.textContent!==value)el.textContent=value;};
+    set("h2",p.title); set("p",p.desc);
+    set('[data-a11y-size="normal"]',p.normal); set('[data-a11y-size="large"]',p.large); set('[data-a11y-size="xlarge"]',p.xlarge);
+    set('[data-a11y-contrast]',p.contrast); set('[data-a11y-motion]',p.motion); set('[data-a11y-underline]',p.underline); set('[data-a11y-reset]',p.reset);
+  }
+
   function ensure(){
     const lang=validLang();
     document.querySelectorAll(".top-actions").forEach(top=>{
@@ -40,30 +50,7 @@
       const select=nav?.querySelector("[data-nav-language]");
       if(select)select.value=lang;
     });
-
-    /* accessibility.js owns the panel DOM. Keep its labels synchronized. */
-    const p=PANEL[lang];
-    const panel=document.querySelector(".accessibility-panel");
-    if(panel&&p){
-      const heading=panel.querySelector("h2");
-      const desc=panel.querySelector("p");
-      const normal=panel.querySelector('[data-a11y-size="normal"]');
-      const large=panel.querySelector('[data-a11y-size="large"]');
-      const xlarge=panel.querySelector('[data-a11y-size="xlarge"]');
-      const contrast=panel.querySelector('[data-a11y-contrast]');
-      const motion=panel.querySelector('[data-a11y-motion]');
-      const underline=panel.querySelector('[data-a11y-underline]');
-      const reset=panel.querySelector('[data-a11y-reset]');
-      if(heading)heading.textContent=p.title;
-      if(desc)desc.textContent=p.desc;
-      if(normal)normal.textContent=p.normal;
-      if(large)large.textContent=p.large;
-      if(xlarge)xlarge.textContent=p.xlarge;
-      if(contrast)contrast.textContent=p.contrast;
-      if(motion)motion.textContent=p.motion;
-      if(underline)underline.textContent=p.underline;
-      if(reset)reset.textContent=p.reset;
-    }
+    syncPanel(lang);
     document.documentElement.lang=lang;
     document.body.dataset.language=lang;
   }
@@ -72,7 +59,6 @@
     if(!LANGS[lang])return;
     localStorage.setItem(LANG_KEY,lang);
     localStorage.setItem(A11Y_LANG_KEY,lang);
-    /* Reload from a clean render so translation never compounds. */
     location.reload();
   }
 
@@ -80,9 +66,8 @@
     if(e.target.matches?.("[data-nav-language]"))setLanguage(e.target.value);
   });
 
-  const observer=new MutationObserver(()=>queueMicrotask(ensure));
-  observer.observe(document.body,{childList:true,subtree:true});
+  /* Route changes are hash-based; refresh the shared shell after the app render. */
   window.addEventListener("hashchange",()=>setTimeout(ensure,0));
-  window.addEventListener("storage",e=>{if(e.key===LANG_KEY||e.key===A11Y_LANG_KEY)ensure();});
+  window.addEventListener("pageshow",ensure);
   setTimeout(ensure,0);
 })();
