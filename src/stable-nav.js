@@ -120,7 +120,7 @@
     if (event.target.matches("[data-shell-language]")) setLanguage(event.target.value);
   });
 
-  window.addEventListener("hashchange", ensureLegacyHeaderHidden);
+  window.addEventListener("hashchange", () => { renderShell(); ensureLegacyHeaderHidden(); });
   const observer = new MutationObserver(() => ensureLegacyHeaderHidden());
   if (app) observer.observe(app, { childList: true });
 
