@@ -1,136 +1,170 @@
-/* CarePath mobile-first overrides. Loaded last so the prototype remains usable on narrow touch screens. */
+/* CarePath mobile-first overrides. Mobile is a primary product surface, not a squeezed desktop. */
 @media (max-width: 760px) {
-  html, body { width: 100%; max-width: 100%; overflow-x: hidden; }
-  #app, #app > * { min-width: 0; max-width: 100%; }
-  img, svg, video, canvas { max-width: 100%; }
+  html, body { width:100%; max-width:100%; overflow-x:hidden; }
+  body { -webkit-text-size-adjust:100%; }
+  #app, #app > * { min-width:0; max-width:100%; }
+  img, svg, video, canvas { max-width:100%; }
+  button, a, select, input { -webkit-tap-highlight-color:transparent; }
 
-  /* Stable shell: keep the header compact and prevent controls from pushing the page wider. */
+  /* Stable shell: compact, predictable, touchable. */
   .carepath-stable-shell {
-    height: 64px;
-    min-height: 64px;
-    padding: 8px 12px;
-    gap: 8px;
+    height:64px; min-height:64px; padding:8px 12px; gap:8px;
   }
-  .carepath-stable-shell .brand { flex: 0 0 auto; font-size: 1rem; gap: 7px; }
-  .carepath-stable-shell .brand-mark { width: 30px; height: 30px; }
-  .carepath-stable-shell .carepath-shell-nav { flex: 1 1 auto; min-width: 0; gap: 5px; justify-content: flex-end; }
-  .carepath-stable-shell .prototype-chip { display: none !important; }
+  .carepath-stable-shell .brand { flex:0 0 auto; font-size:1rem; gap:7px; }
+  .carepath-stable-shell .brand-mark { width:30px; height:30px; }
+  .carepath-stable-shell .prototype-chip { display:none !important; }
+  .carepath-stable-shell .carepath-shell-nav {
+    flex:1 1 auto; min-width:0; gap:5px; justify-content:flex-end; overflow:hidden;
+  }
   .carepath-stable-shell .shell-tool,
   .carepath-stable-shell .shell-language select,
   .carepath-stable-shell .icon-button {
-    min-height: 40px;
-    height: 40px;
-    border-radius: 11px;
+    min-height:40px; height:40px; border-radius:11px;
   }
   .carepath-stable-shell .shell-tool {
-    width: 40px;
-    min-width: 40px;
-    padding: 0 !important;
-    font-size: 0 !important;
-    display: grid;
-    place-items: center;
+    width:40px; min-width:40px; padding:0 !important; font-size:0 !important;
+    display:grid; place-items:center;
   }
-  .carepath-stable-shell .shell-tool span { display: none !important; }
-  .carepath-stable-shell .shell-language select { width: 64px; min-width: 64px; padding: 0 5px; font-size: 13px; }
-  .carepath-stable-shell .icon-button { width: 40px; min-width: 40px; padding: 0; }
-  .carepath-stable-shell [data-shell-auth] { min-width: 0; }
+  .carepath-stable-shell .shell-tool span { display:none !important; }
+  .carepath-stable-shell .shell-tool::first-letter { font-size:18px; }
+  .carepath-stable-shell .shell-language select {
+    width:64px; min-width:64px; padding:0 5px; font-size:13px;
+  }
+  .carepath-stable-shell .icon-button { width:40px; min-width:40px; padding:0; }
+  .carepath-stable-shell [data-shell-auth] { min-width:0; }
   .carepath-stable-shell [data-shell-auth] .role-chip,
   .carepath-stable-shell [data-shell-auth] button {
-    max-width: 76px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    max-width:72px; min-width:40px; overflow:hidden; white-space:nowrap;
+    text-overflow:ellipsis; min-height:40px;
   }
 
-  .page { width: 100%; max-width: 100%; padding: 34px 18px 72px; }
-  .page h1 { font-size: clamp(2.65rem, 13vw, 4.3rem); line-height: .94; overflow-wrap: anywhere; }
-  .page h2 { overflow-wrap: anywhere; }
-  .page p { font-size: .95rem; }
-
-  .service-hero,
-  .split-page { min-height: auto; display: block; padding-top: 24px; }
-  .service-hero { padding-bottom: 24px; }
-  .service-hero > div:first-child,
-  .split-copy { max-width: none; }
-  .service-hero h1, .split-copy h1 { margin-bottom: 18px; }
-  .service-hero p:not(.eyebrow), .split-copy > p:not(.eyebrow) { font-size: .98rem; }
-  .hero-note { margin: 24px 0 0; padding: 16px; }
-
-  .service-grid { grid-template-columns: 1fr; gap: 12px; }
-  .service-card { min-height: 0; padding: 18px; border-radius: 16px; }
-  .service-card h2 { font-size: 1.25rem; }
-  .principles { grid-template-columns: 1fr; }
-  .principles div { border-right: 0; border-bottom: 1px solid var(--line); }
+  .page { width:100%; max-width:100%; padding:30px 16px 72px; }
+  .page h1 { font-size:clamp(2.5rem,12vw,4rem); line-height:.94; overflow-wrap:anywhere; }
+  .page h2, .page h3, .page p, .page b, .page strong { overflow-wrap:anywhere; }
+  .page p { font-size:.95rem; }
+  .service-hero, .split-page { min-height:auto; display:block; padding-top:20px; }
+  .service-hero { padding-bottom:20px; }
+  .service-hero > div:first-child, .split-copy { max-width:none; }
+  .service-hero h1, .split-copy h1 { margin-bottom:18px; }
+  .service-hero p:not(.eyebrow), .split-copy > p:not(.eyebrow) { font-size:.98rem; }
+  .hero-note { margin:24px 0 0; padding:16px; }
+  .service-grid { grid-template-columns:1fr; gap:12px; }
+  .service-card { min-height:0; padding:18px; border-radius:16px; }
+  .service-card h2 { font-size:1.25rem; }
+  .principles { grid-template-columns:1fr; }
+  .principles div { border-right:0; border-bottom:1px solid var(--line); }
 
   .choice-panel, .question-panel, .process-panel, .login-card,
-  .confirmation-card, .visit-card { border-radius: 18px; box-shadow: 0 12px 34px rgba(18,52,56,.08); }
-  .choice-panel, .question-panel, .process-panel, .login-card { padding: 14px; }
-  .choice-row { grid-template-columns: 30px 1fr 22px; padding: 13px 6px; }
-  .choice-row b { font-size: .84rem; }
+  .confirmation-card, .visit-card { border-radius:18px; box-shadow:0 12px 34px rgba(18,52,56,.08); }
+  .choice-panel, .question-panel, .process-panel, .login-card { padding:14px; }
+  .choice-row { grid-template-columns:30px minmax(0,1fr) 22px; padding:13px 6px; min-height:52px; }
+  .choice-row b { font-size:.84rem; }
+  .segmented { grid-template-columns:1fr 1fr; }
+  .segmented button, .role-tabs button { min-height:46px; }
+  .input-wrap input, .login-card input { min-height:48px; font-size:16px; }
+  .primary-button, .secondary-button { min-height:48px; }
 
-  .confirmation-card { padding: 20px; }
-  .confirmation-card dl { grid-template-columns: 1fr; }
-  .confirmation-card dl div { border-right: 0; border-bottom: 1px solid var(--line); }
-  .confirmation-card dl div:last-child { border-bottom: 0; }
+  .confirmation-card { padding:20px; }
+  .confirmation-card dl { grid-template-columns:1fr; }
+  .confirmation-card dl div { border-right:0; border-bottom:1px solid var(--line); }
+  .confirmation-card dl div:last-child { border-bottom:0; }
 
-  .visit-page { padding: 24px 14px 70px; }
-  .visit-head { display: block; margin-bottom: 16px; }
-  .visit-head h1 { font-size: clamp(2.4rem, 12vw, 4rem); }
-  .live-pill { display: inline-flex; margin-top: 12px; }
-  .visit-status { padding: 12px 15px; }
-  .visit-main { padding: 24px 18px 20px; }
-  .visit-main h2 { font-size: clamp(1.8rem, 8vw, 2.8rem); }
-  .visit-info { grid-template-columns: 1fr 1fr; }
-  .visit-info > div { min-height: 88px; padding: 14px; border-bottom: 1px solid var(--line); }
-  .visit-info > div:nth-child(2n) { border-right: 0; }
-  .visit-info > div:nth-last-child(-n+2) { border-bottom: 0; }
-  .visit-action { margin: 18px 14px 8px; width: calc(100% - 28px); }
-  .text-button, .explanation, .fine-print { margin-left: 14px; margin-right: 14px; }
-  .journey-progress { padding: 22px 10px; overflow-x: auto; }
-  .journey-progress ol { min-width: 640px; }
+  .visit-page { padding:24px 12px 78px; }
+  .visit-head { display:block; margin-bottom:16px; }
+  .visit-head h1 { font-size:clamp(2.35rem,11vw,3.8rem); }
+  .live-pill { display:inline-flex; margin-top:12px; }
+  .visit-status { padding:12px 15px; }
+  .visit-main { padding:24px 18px 20px; }
+  .visit-main h2 { font-size:clamp(1.8rem,8vw,2.8rem); }
+  .visit-info { grid-template-columns:1fr 1fr; }
+  .visit-info > div { min-height:88px; padding:14px; border-bottom:1px solid var(--line); }
+  .visit-info > div:nth-child(2n) { border-right:0; }
+  .visit-info > div:nth-last-child(-n+2) { border-bottom:0; }
+  .visit-action { margin:18px 14px 8px; width:calc(100% - 28px); }
+  .text-button, .explanation, .fine-print { margin-left:14px; margin-right:14px; }
+  .journey-progress { padding:22px 8px; overflow-x:auto; }
+  .journey-progress ol { min-width:620px; }
+  .journey-mini { max-width:none; width:100%; margin-top:28px; }
 
-  /* Rails are intentionally horizontally scrollable rather than clipped. */
-  .journey-mini { max-width: none; width: 100%; margin-top: 28px; }
+  /* Staff: mobile is a task console. Put the next action before the dense status cards. */
+  .cp-staff-command {
+    width:calc(100% - 12px); max-width:none; margin:8px auto 28px; border-radius:20px;
+    min-height:0; display:block; overflow:hidden;
+  }
+  .cp-staff-sidebar { padding:12px 10px; min-height:0; }
+  .cp-staff-hospital { padding:4px 6px 12px; }
+  .cp-staff-sidebar nav {
+    display:flex; overflow-x:auto; gap:6px; padding-top:10px; scrollbar-width:none;
+    margin-right:-4px; padding-bottom:2px;
+  }
+  .cp-staff-sidebar nav::-webkit-scrollbar { display:none; }
+  .cp-staff-sidebar nav button {
+    flex:0 0 auto; min-width:82px; min-height:44px; text-align:center; padding:8px 7px;
+  }
+  .cp-staff-sidebar nav span { display:block; margin:3px 0 0; }
+  .cp-staff-main { padding:13px; min-width:0; }
+  .cp-staff-top { display:block; margin-bottom:14px; }
+  .cp-staff-top h2 { font-size:clamp(1.75rem,8vw,2.35rem); line-height:1; }
+  .cp-staff-user { display:inline-block; margin-top:9px; max-width:100%; }
+  .cp-metric-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; }
+  .cp-metric-grid > div { padding:12px 9px; border-radius:13px; }
+  .cp-metric-grid strong { font-size:23px; }
+  .cp-metric-grid small { font-size:9px; line-height:1.2; }
+  .cp-staff-grid { display:flex; flex-direction:column; gap:10px; }
+  .cp-action-card { order:-1; }
+  .cp-staff-card, .cp-staff-journey, .cp-page-section { padding:14px; min-width:0; border-radius:16px; }
+  .cp-card-title b { font-size:16px; }
+  .cp-patient-meta { font-size:11px; }
+  .cp-staff-stats { grid-template-columns:1fr 1fr; }
+  .cp-staff-actions { gap:7px; }
+  .cp-staff-actions button, .cp-context-action button {
+    min-height:48px; padding:11px 12px; font-size:12px; border-radius:11px;
+  }
+  .cp-context-action { margin-top:10px; padding-bottom:10px; }
+  .cp-context-action button { font-size:13px; }
+  .cp-staff-journey { overflow:hidden; }
+  .cp-staff-rail {
+    overflow-x:auto; grid-template-columns:repeat(8,74px); gap:2px;
+    margin:16px -4px 0; padding:0 4px 8px;
+  }
+  .cp-staff-rail > div { font-size:9px; }
+  .cp-staff-rail small { white-space:nowrap; font-size:9px; }
+  .cp-queue-preview, .cp-queue-table { overflow-x:hidden; }
+  .cp-patient-row {
+    width:100%; min-width:0; grid-template-columns:34px minmax(0,1fr) auto;
+    gap:7px; padding:12px 3px; min-height:54px;
+  }
+  .cp-patient-name { min-width:0; }
+  .cp-patient-name b { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; }
+  .cp-patient-name small { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .cp-patient-status { max-width:82px; text-align:right; line-height:1.2; }
+  .cp-patient-room { display:none; }
+  .cp-section-head { display:block; margin-bottom:13px; }
+  .cp-section-head > strong { display:inline-block; margin-top:9px; }
+  .cp-inline-link { min-height:44px; }
 
-  .cp-staff-command { width: calc(100% - 20px); max-width: none; margin: 10px auto 28px; border-radius: 20px; min-height: 0; display: block; }
-  .cp-staff-sidebar { padding: 15px 12px; min-height: 0; }
-  .cp-staff-sidebar nav { display: flex; overflow-x: auto; gap: 6px; padding-top: 12px; scrollbar-width: none; }
-  .cp-staff-sidebar nav::-webkit-scrollbar { display: none; }
-  .cp-staff-sidebar nav button { flex: 0 0 auto; min-width: 82px; text-align: center; padding: 9px 7px; }
-  .cp-staff-sidebar nav span { display: block; margin: 3px 0 0; }
-  .cp-staff-main { padding: 16px; min-width: 0; }
-  .cp-staff-top { display: block; }
-  .cp-staff-top h2 { font-size: clamp(1.8rem, 8vw, 2.4rem); }
-  .cp-staff-user { display: inline-block; margin-top: 10px; max-width: 100%; }
-  .cp-metric-grid { grid-template-columns: 1fr; }
-  .cp-staff-grid { grid-template-columns: 1fr; }
-  .cp-staff-card, .cp-staff-journey, .cp-page-section { padding: 15px; min-width: 0; }
-  .cp-staff-rail { overflow-x: auto; grid-template-columns: repeat(8, 76px); padding-bottom: 6px; }
-  .cp-queue-preview, .cp-queue-table { overflow-x: auto; }
-  .cp-patient-row { min-width: 0; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 8px; }
-  .cp-patient-name { min-width: 0; }
-  .cp-patient-name b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .cp-patient-room { display: none; }
-  .cp-section-head { display: block; }
-  .cp-section-head > strong { display: inline-block; margin-top: 10px; }
-
-  /* Common generated panels and grids should never force desktop width. */
-  [class*="grid"] { min-width: 0; }
-  .cp-ai-launcher { right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); padding: 11px 15px; font-size: 13px; }
-  .cp-ai-panel { right: 10px; left: 10px; bottom: calc(62px + env(safe-area-inset-bottom)); width: auto; max-width: none; max-height: calc(100vh - 90px); border-radius: 20px; }
+  .cp-ai-launcher {
+    right:12px; bottom:calc(12px + env(safe-area-inset-bottom));
+    padding:11px 15px; font-size:13px; max-width:calc(100vw - 24px);
+  }
+  .cp-ai-panel {
+    right:10px; left:10px; bottom:calc(62px + env(safe-area-inset-bottom));
+    width:auto; max-width:none; max-height:calc(100vh - 90px); border-radius:20px;
+  }
 }
 
-@media (max-width: 420px) {
-  .carepath-stable-shell { padding-left: 9px; padding-right: 9px; }
-  .carepath-stable-shell .brand { font-size: .94rem; }
-  .carepath-stable-shell .brand-mark { width: 28px; height: 28px; }
-  .carepath-stable-shell .shell-language select { width: 58px; min-width: 58px; }
-  .carepath-stable-shell .shell-tool, .carepath-stable-shell .icon-button { width: 36px; min-width: 36px; height: 36px; min-height: 36px; }
-  .page { padding-left: 14px; padding-right: 14px; }
-  .visit-page { padding-left: 10px; padding-right: 10px; }
-  .visit-info { grid-template-columns: 1fr; }
-  .visit-info > div, .visit-info > div:nth-last-child(-n+2) { border-right: 0; border-bottom: 1px solid var(--line); }
-  .visit-info > div:last-child { border-bottom: 0; }
-  .cp-staff-command { width: calc(100% - 12px); }
-  .cp-staff-main { padding: 12px; }
+@media (max-width:420px) {
+  .carepath-stable-shell { padding-left:8px; padding-right:8px; }
+  .carepath-stable-shell .brand { font-size:.94rem; }
+  .carepath-stable-shell .brand-mark { width:28px; height:28px; }
+  .carepath-stable-shell .shell-language select { width:58px; min-width:58px; }
+  .carepath-stable-shell .shell-tool, .carepath-stable-shell .icon-button { width:36px; min-width:36px; height:36px; min-height:36px; }
+  .page { padding-left:13px; padding-right:13px; }
+  .visit-page { padding-left:9px; padding-right:9px; }
+  .visit-info { grid-template-columns:1fr; }
+  .visit-info > div, .visit-info > div:nth-last-child(-n+2) { border-right:0; border-bottom:1px solid var(--line); }
+  .visit-info > div:last-child { border-bottom:0; }
+  .cp-staff-command { width:calc(100% - 8px); }
+  .cp-staff-main { padding:10px; }
+  .cp-metric-grid { grid-template-columns:1fr; }
 }
