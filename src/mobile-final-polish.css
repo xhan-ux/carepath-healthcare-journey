@@ -1,0 +1,61 @@
+/* Final mobile polish: compact controls, real iconography, and a calmer journey. */
+@media (max-width:760px){
+  /* Global shell: never show unexplained empty pills. */
+  .carepath-stable-shell .shell-tool{font-size:0!important;position:relative;overflow:hidden}
+  .carepath-stable-shell .shell-tool::before{font-size:18px;line-height:1;display:block}
+  .carepath-stable-shell [data-shell-a11y]::before{content:"♿"}
+  .carepath-stable-shell [data-shell-read]::before{content:"🔊"}
+  .carepath-stable-shell .icon-button::before{content:"⌂";font-size:17px;line-height:1}
+  .carepath-stable-shell [data-shell-auth] button{font-size:0!important;position:relative;display:grid;place-items:center}
+  .carepath-stable-shell [data-shell-auth] button::before{content:"↪";font-size:18px;line-height:1}
+  .carepath-stable-shell .shell-language select{font-weight:850}
+
+  /* Staff navigation: recognizable icons + readable labels, not tiny mystery glyphs. */
+  .cp-staff-sidebar nav button{font-size:0!important;line-height:1.15;min-width:68px;gap:3px}
+  .cp-staff-sidebar nav button::before{display:block;font-size:16px;line-height:1.1;margin-bottom:3px}
+  .cp-staff-sidebar nav button:nth-child(1)::before{content:"⌂"}
+  .cp-staff-sidebar nav button:nth-child(2)::before{content:"◷"}
+  .cp-staff-sidebar nav button:nth-child(3)::before{content:"♙"}
+  .cp-staff-sidebar nav button:nth-child(4)::before{content:"!"}
+  .cp-staff-sidebar nav button:nth-child(5)::before{content:"⚙"}
+  .cp-staff-sidebar nav button span{font-size:10px!important;line-height:1.15;margin:0!important}
+
+  /* Patient journey: one clear story, no misleading contextual labels. */
+  .cp-journey-rail{padding:16px 14px!important}
+  .cp-journey-rail-head b{font-size:16px!important}
+  .cp-journey-track{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:0!important;overflow:visible!important;position:relative;margin-top:16px!important}
+  .cp-journey-track::before{content:"";position:absolute;top:15px;left:16%;right:16%;height:2px;background:#dfe9e7;z-index:0}
+  .cp-journey-step{display:block!important;min-width:0!important;position:relative;z-index:1}
+  .cp-journey-step::after{display:none!important}
+  .cp-journey-step span{width:31px!important;height:31px!important;font-size:10px!important}
+  .cp-journey-step small{display:block!important;font-size:9px!important;margin-top:7px!important;white-space:normal!important;line-height:1.2!important}
+  .cp-journey-step:nth-child(1) small{font-size:0!important}
+  .cp-journey-step:nth-child(1) small::after{content:"Done";font-size:9px}
+  .cp-journey-step:nth-child(2) small{font-size:0!important}
+  .cp-journey-step:nth-child(2) small::after{content:"Now";font-size:9px}
+  .cp-journey-step:nth-child(3) small{font-size:0!important}
+  .cp-journey-step:nth-child(3) small::after{content:"Next";font-size:9px}
+
+  /* The longer journey used by the patient page: show the first four meaningful milestones. */
+  .journey-progress{padding:16px 4px!important}
+  .journey-progress ol{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0!important;position:relative}
+  .journey-progress ol::before{content:"";position:absolute;top:14px;left:10%;right:10%;height:2px;background:var(--line);z-index:0}
+  .journey-progress ol>li{position:relative;z-index:1;min-width:0}
+  .journey-progress ol>li:nth-child(n+5){display:none!important}
+  .journey-progress ol>li small{font-size:0!important;white-space:nowrap}
+  .journey-progress ol>li:nth-child(1) small::after{content:"Appointment";font-size:9px}
+  .journey-progress ol>li:nth-child(2) small::after{content:"Arrive";font-size:9px}
+  .journey-progress ol>li:nth-child(3) small::after{content:"Registration";font-size:9px}
+  .journey-progress ol>li:nth-child(4) small::after{content:"Called";font-size:9px}
+
+  /* Staff journey rail: keep it scrollable but visually quieter. */
+  .cp-staff-journey{padding-bottom:10px!important}
+  .cp-staff-rail{scrollbar-width:none!important}
+  .cp-staff-rail::-webkit-scrollbar{display:none}
+}
+@media (max-width:430px){
+  .carepath-stable-shell .shell-tool,.carepath-stable-shell .icon-button{width:34px!important;min-width:34px!important}
+  .carepath-stable-shell .shell-tool::before{font-size:16px}
+  .cp-staff-sidebar nav button{min-width:64px}
+  .cp-staff-sidebar nav button::before{font-size:15px}
+}
