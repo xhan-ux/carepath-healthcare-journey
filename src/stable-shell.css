@@ -1,0 +1,11 @@
+/* Stable global shell: rendered outside #app so route changes cannot replace it. */
+.carepath-stable-shell{position:sticky;top:0;z-index:1000;min-height:70px}
+.carepath-shell-nav{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:0}
+.shell-tool,.shell-language select{font:inherit;font-weight:700;border:1px solid #d7e4e1;background:#fff;color:#123c3f;border-radius:12px;min-height:42px;padding:0 13px;cursor:pointer}
+.shell-tool:hover,.shell-language select:hover{border-color:#0c8084;background:#f5fbfa}
+.shell-language{display:flex;align-items:center}.shell-language select{appearance:auto;padding-right:10px}
+.stable-a11y-panel{position:fixed;top:82px;right:24px;width:min(390px,calc(100vw - 32px));z-index:2000;background:#fff;border:1px solid #d7e4e1;border-radius:18px;box-shadow:0 20px 60px rgba(10,50,52,.18);padding:22px}
+.stable-a11y-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}.stable-a11y-head h2{margin:4px 0 0}.stable-a11y-head button{border:0;background:transparent;font-size:28px;cursor:pointer}
+.stable-a11y-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:18px 0}.stable-a11y-options button{border:1px solid #d7e4e1;background:#fff;border-radius:12px;padding:12px;text-align:left;cursor:pointer;font-weight:650}.stable-a11y-options button:hover{background:#eef8f6}
+#app>.topbar[hidden]{display:none!important}
+@media(max-width:760px){.carepath-stable-shell{padding:10px 14px}.carepath-stable-shell .prototype-chip{display:none}.carepath-shell-nav{gap:5px}.shell-tool{font-size:0;padding:0 10px}.shell-tool:first-child{font-size:18px}.shell-language select{max-width:74px;padding:0 7px}.stable-a11y-panel{top:76px;right:12px}}
