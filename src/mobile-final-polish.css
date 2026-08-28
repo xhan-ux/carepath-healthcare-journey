@@ -5,20 +5,20 @@
   .carepath-stable-shell .shell-tool::before{font-size:18px;line-height:1;display:block}
   .carepath-stable-shell [data-shell-a11y]::before{content:"♿"}
   .carepath-stable-shell [data-shell-read]::before{content:"🔊"}
-  .carepath-stable-shell .icon-button::before{content:"⌂";font-size:17px;line-height:1}
+  .carepath-stable-shell .icon-button{display:none!important}
   .carepath-stable-shell [data-shell-auth] button{font-size:0!important;position:relative;display:grid;place-items:center}
   .carepath-stable-shell [data-shell-auth] button::before{content:"↪";font-size:18px;line-height:1}
   .carepath-stable-shell .shell-language select{font-weight:850}
 
-  /* Staff navigation: compact, tappable, and no redundant home item. */
+  /* Staff navigation: compact. The CarePath logo is the home/dashboard link. */
   .cp-staff-sidebar{position:sticky;top:56px;z-index:4;padding:10px 12px 8px!important}
   .cp-staff-hospital{padding:2px 4px 9px!important}
   .cp-staff-hospital>span{width:34px;height:34px}
   .cp-staff-sidebar nav{display:flex;overflow-x:auto;gap:5px;padding:7px 0 0!important;scrollbar-width:none}
   .cp-staff-sidebar nav::-webkit-scrollbar{display:none}
   .cp-staff-sidebar nav button{flex:0 0 auto;min-width:64px!important;padding:7px 7px!important;text-align:center!important;font-size:0!important;line-height:1.1}
+  .cp-staff-sidebar nav button:nth-child(1){display:none!important}
   .cp-staff-sidebar nav button::before{display:block;font-size:17px;line-height:1.1;margin-bottom:3px}
-  .cp-staff-sidebar nav button:nth-child(1)::before{content:"⌂"}
   .cp-staff-sidebar nav button:nth-child(2)::before{content:"◷"}
   .cp-staff-sidebar nav button:nth-child(3)::before{content:"♙"}
   .cp-staff-sidebar nav button:nth-child(4)::before{content:"!"}
@@ -96,7 +96,7 @@
 }
 
 @media (max-width:430px){
-  .carepath-stable-shell .shell-tool,.carepath-stable-shell .icon-button{width:38px!important;min-width:38px!important;height:38px!important}
+  .carepath-stable-shell .shell-tool{width:38px!important;min-width:38px!important;height:38px!important}
   .carepath-stable-shell .shell-tool::before{font-size:17px}
   .cp-staff-command{width:calc(100% - 10px)!important;border-radius:18px!important}
   .cp-staff-sidebar{top:54px!important}
