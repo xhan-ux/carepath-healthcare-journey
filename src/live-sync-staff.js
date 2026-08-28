@@ -2,18 +2,13 @@
 (() => {
   const STAFF_KEY = "carepath:staff:patients:v2";
   const STATION_KEY = "carepath:staff:station:v1";
+  const LIVE_KEY = "carepath:last-live-journey:v1";
   const stations = [
     ["registration", "Registration", "Check-in, registration & queue"],
     ["doctor", "Doctor", "Calling & consultation"],
     ["lab", "Lab", "Tests & diagnostics"],
     ["pharmacy", "Pharmacy", "Medicines & completion"]
   ];
-  const labels = {
-    registration: { eyebrow: "REGISTRATION DESK", title: "Check-in & registration" },
-    doctor: { eyebrow: "DOCTOR DESK", title: "Doctor & consultation" },
-    lab: { eyebrow: "LAB DESK", title: "Lab & diagnostics" },
-    pharmacy: { eyebrow: "PHARMACY DESK", title: "Pharmacy" }
-  };
   let busy = false;
   let lastJourneyKey = "";
 
@@ -68,13 +63,13 @@
     syncStaff(journey);
     updateStationUI(journey.state);
 
-    // The main patient app owns its state inside an ES module. When the live bridge
-    // detects a change, reload once so that app.js rehydrates from /api/state.
-    if (sessionStorage.getItem("carepath:role:v6") === "patient" && location.hash.startsWith("#/healthcare/visit/") && window.__carepathLastJourneyKey && window.__carepathLastJourneyKey !== key) {
-      location.reload();
-      return;
-    }
-    window.__carepathLastJourneyKey = key;
+    const role = sessionStorage.getItem("carepath:role:v6");
+    const patientPage = role === "patient" && location.hash.startsWith("#/healthcare/visit/");
+    const previous = sessionStorage.getItem(LIVE_KEY);
+    sessionStorage.setItem(LIVE_KEY, key);
+    // Rehydrate the patient app from /api/state when the server changes. The key is
+    // persisted so the reload happens once, not in a loop.
+    if (patientPage && previous && previous !== key) location.reload();
   }
 
   async function pull() {
@@ -98,7 +93,7 @@
     } catch {}
   }
 
-  const observer = new MutationObserver(() => { addStations(); });
+  const observer = new MutationObserver(() => addStations());
   observer.observe(document.body, { childList: true, subtree: true });
   window.addEventListener("DOMContentLoaded", () => { addStations(); pull(); connect(); setInterval(pull, 2000); });
   setTimeout(() => { addStations(); pull(); }, 500);
