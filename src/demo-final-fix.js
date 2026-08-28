@@ -1,4 +1,4 @@
-/* Final demo presentation fix: isolate staff from patient shell and show an explicit registration confirmation. */
+/* Final demo presentation fix: show an explicit registration confirmation without taking ownership of the staff app shell. */
 (() => {
   const ROLE_KEYS = ["carepath:role:v6", "carepath:demo-role:v2", "carepath:role:v2"];
   const role = () => ROLE_KEYS.map(k => { try { return sessionStorage.getItem(k); } catch { return null; } }).find(Boolean) || null;
@@ -9,11 +9,7 @@
     const s = document.createElement("style");
     s.id = "cp-final-demo-style";
     s.textContent = `
-      /* A staff device owns the staff console. Never leave the patient app underneath it. */
-      body.cp-staff-device #app { display:none !important; }
-      body.cp-staff-device .cp-staff-command { display:block !important; }
-      body:not(.cp-staff-device) .cp-staff-command { display:none !important; }
-
+      /* Staff shell visibility is handled by demo-stability-fix.js. This layer must never hide #app. */
       .cp-registration-confirmation {
         margin: 18px 10px 0;
         padding: 22px 22px 20px;
@@ -50,13 +46,6 @@
     document.head.appendChild(s);
   }
 
-  function syncRole() {
-    style();
-    const r = role();
-    document.body.classList.toggle("cp-staff-device", r === "staff");
-    document.body.classList.toggle("cp-patient-device", r === "patient");
-  }
-
   function registrationConfirmation() {
     const app = document.querySelector("#app");
     if (!app || role() !== "patient") return;
@@ -84,7 +73,7 @@
     anchor.prepend(card);
   }
 
-  function sync() { syncRole(); registrationConfirmation(); }
+  function sync() { style(); registrationConfirmation(); }
   sync();
   new MutationObserver(() => sync()).observe(document.body, { childList:true, subtree:true });
   window.addEventListener("hashchange", () => setTimeout(sync, 30));
