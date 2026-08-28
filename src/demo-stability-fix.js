@@ -1,46 +1,13 @@
-/* Final demo stability layer.
-   Staff and patient browsers share journey state, but each browser owns its UI route. */
+/* Demo stability layer.
+   IMPORTANT: this file must never hide #app or the login page.
+   The staff route is protected by staff-route-guard.js; this layer only
+   provides a patient fallback if a renderer leaves the app empty. */
 (() => {
   const ROLE_KEYS = ["carepath:role:v6", "carepath:demo-role:v2", "carepath:role:v2"];
-  const isStaff = () => ROLE_KEYS.some((key) => { try { return sessionStorage.getItem(key) === "staff"; } catch { return false; } });
-  const isPatient = () => ROLE_KEYS.some((key) => { try { return sessionStorage.getItem(key) === "patient"; } catch { return false; } });
+  const isPatient = () => ROLE_KEYS.some((key) => {
+    try { return sessionStorage.getItem(key) === "patient"; } catch { return false; }
+  });
   const route = () => location.hash.replace(/^#\/?/, "") || "services";
-
-  function installStyle() {
-    if (document.getElementById("cp-demo-stability-style")) return;
-    const style = document.createElement("style");
-    style.id = "cp-demo-stability-style";
-    style.textContent = `
-      body.cp-staff-active .login-page,
-      body.cp-staff-active #app:has(.login-page) { display:none !important; }
-      body.cp-staff-active .cp-staff-command { display:block !important; }
-      .cp-staff-command .cp-staff-actions{display:grid!important;grid-template-columns:1fr 1fr;gap:10px!important;margin-top:16px!important}
-      .cp-staff-command .cp-staff-actions button,.cp-staff-command .cp-context-action button{box-sizing:border-box!important;min-height:52px!important;width:100%!important;margin:0!important;padding:13px 16px!important;border-radius:16px!important;border:1px solid rgba(12,102,107,.22)!important;background:#0c8084!important;color:#fff!important;font:inherit!important;font-weight:700!important;line-height:1.2!important;box-shadow:none!important;text-align:left!important}
-      .cp-staff-command .cp-context-action button{font-size:16px!important;min-height:54px!important}
-      .cp-staff-command .cp-staff-actions button:nth-child(2),.cp-staff-command .cp-staff-actions button:nth-child(4){background:#fff!important;color:#145f63!important}
-      .cp-staff-command .cp-staff-actions button:nth-child(3){background:#fff7e3!important;color:#6e5515!important;border-color:rgba(110,85,21,.18)!important}
-      .cp-staff-command .cp-staff-actions button.muted{background:#eef4f3!important;color:#537173!important;border-color:rgba(12,102,107,.10)!important}
-      .cp-staff-command .cp-staff-actions button span,.cp-staff-command .cp-context-action button span{float:right!important;font-weight:800!important}
-      @media(max-width:700px){.cp-staff-command .cp-staff-actions{grid-template-columns:1fr!important}.cp-staff-command .cp-staff-actions button{min-height:54px!important}}
-    `;
-    document.head.appendChild(style);
-  }
-
-  function syncStaffChrome() {
-    installStyle();
-    document.body.classList.toggle("cp-staff-active", isStaff());
-    document.body.classList.toggle("cp-patient-active", isPatient());
-    if (isStaff()) document.querySelectorAll(".login-page").forEach((el) => { el.style.display = "none"; });
-  }
-
-  /* Do not dispatch another hashchange here. The original hashchange event is
-     already being handled in capture phase by staff-route-guard.js. Dispatching
-     a second synthetic event was the source of the navigation race. */
-  function guardStaffRoute() {
-    if (!isStaff()) return;
-    if (!route().startsWith("healthcare/visit")) return;
-    history.replaceState(null, "", "#/staff");
-  }
 
   async function patientFallback() {
     if (!isPatient() || !route().startsWith("healthcare/visit")) return;
@@ -48,9 +15,10 @@
     if (!app || app.children.length) return;
     try {
       const response = await fetch("/api/state", { cache: "no-store" });
+      if (!response.ok) return;
       const data = await response.json();
       const j = data.journey;
-      if (!j) return;
+      if (!j?.patient || !j?.visit) return;
       const copy = {
         APPOINTMENT_CONFIRMED:["Your appointment is ready.","When you reach the hospital, we’ll guide you through the next step.","Arrive at the hospital","OPD Block A · Ground Floor"],
         ARRIVED:["Check in first.","Show your appointment ID at Counter 3. You do not need to figure out the rest of the visit yet.","Register at Counter 3","OPD Block A · Ground Floor"],
@@ -61,14 +29,11 @@
         PHARMACY:["Collect your medicines.","Your lab step is complete. Go to the pharmacy counter.","Complete pharmacy","Pharmacy · OPD Block B"],
         COMPLETED:["You’re done for today.","Your synthetic visit is complete. There are no further steps today.","Visit completed","City Government Hospital"]
       }[j.state] || ["Your visit is updating.","CarePath is waiting for the latest verified journey state.","Please wait","City Government Hospital"];
-      app.innerHTML = `<main class="page patient-fallback"><section class="split-page"><section class="split-copy"><p class="eyebrow">YOUR HOSPITAL VISIT</p><h1>${copy[0]}</h1><p>${copy[1]}</p><div class="notice"><b>NEXT</b><span>${copy[2]}</span></div></section><section class="confirmation-card"><p class="eyebrow">CURRENT VISIT</p><h2>${j.patient.name}</h2><p>Token ${j.visit.token} · ${j.appointment.department}</p><dl><div><dt>WHERE</dt><dd>${copy[3]}</dd></div><div><dt>STATUS</dt><dd>${j.state.replaceAll("_"," ")}</dd></div><div><dt>UPDATED</dt><dd>${j.lastUpdated}</dd></div></dl></section></section></main>`;
+      app.innerHTML = `<main class="page patient-fallback"><section class="split-page"><section class="split-copy"><p class="eyebrow">YOUR HOSPITAL VISIT</p><h1>${copy[0]}</h1><p>${copy[1]}</p><div class="notice"><b>NEXT</b><span>${copy[2]}</span></div></section><section class="confirmation-card"><p class="eyebrow">CURRENT VISIT</p><h2>${j.patient.name}</h2><p>Token ${j.visit.token} · ${j.appointment?.department || "Orthopaedics"}</p><dl><div><dt>WHERE</dt><dd>${copy[3]}</dd></div><div><dt>STATUS</dt><dd>${String(j.state).replaceAll("_"," ")}</dd></div><div><dt>UPDATED</dt><dd>${j.lastUpdated || "Just now"}</dd></div></dl></section></section></main>`;
     } catch {}
   }
 
-  syncStaffChrome();
-  guardStaffRoute();
   patientFallback();
-  new MutationObserver(() => { syncStaffChrome(); guardStaffRoute(); patientFallback(); }).observe(document.body,{childList:true,subtree:true});
-  window.addEventListener("hashchange",()=>{syncStaffChrome();guardStaffRoute();setTimeout(patientFallback,80);});
-  window.addEventListener("carepath:route-rendered",()=>{syncStaffChrome();guardStaffRoute();setTimeout(patientFallback,80);});
+  window.addEventListener("hashchange", () => setTimeout(patientFallback, 100));
+  window.addEventListener("carepath:route-rendered", () => setTimeout(patientFallback, 100));
 })();
