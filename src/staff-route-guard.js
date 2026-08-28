@@ -5,42 +5,37 @@
   const ROLE_KEYS = ["carepath:role:v6", "carepath:role:v2"];
   const LAST_ROUTE_KEY = "carepath:last-staff-route:v1";
   const isStaff = () => {
-    try {
-      return ROLE_KEYS.some((key) => sessionStorage.getItem(key) === "staff");
-    } catch {
-      return false;
-    }
+    try { return ROLE_KEYS.some((key) => sessionStorage.getItem(key) === "staff"); }
+    catch { return false; }
   };
   const currentRoute = () => location.hash.replace(/^#\/?/, "") || "services";
   const isPatientVisitRoute = (route) => route === "healthcare/visit" || route.startsWith("healthcare/visit/");
+
   const rememberStaffRoute = () => {
     if (!isStaff()) return;
     const route = currentRoute();
-    if (!isPatientVisitRoute(route) && route !== "services" && route !== "login") {
+    if (!isPatientVisitRoute(route) && route !== "services" && route !== "login" && route !== "healthcare/staff") {
       try { sessionStorage.setItem(LAST_ROUTE_KEY, route); } catch {}
     }
-  };
-  const restoreStaffRoute = () => {
-    if (!isStaff() || !isPatientVisitRoute(currentRoute())) return;
-    let route = "";
-    try { route = sessionStorage.getItem(LAST_ROUTE_KEY) || ""; } catch {}
-    if (!route || isPatientVisitRoute(route)) route = "healthcare/staff";
-    if (currentRoute() !== route) {
-      history.replaceState(null, "", `#/${route}`);
-      window.dispatchEvent(new HashChangeEvent("hashchange"));
+    if (route === "staff" || route === "healthcare/staff") {
+      try { sessionStorage.setItem(LAST_ROUTE_KEY, "staff"); } catch {}
     }
   };
 
-  rememberStaffRoute();
+  const restoreStaffRoute = () => {
+    if (!isStaff() || !isPatientVisitRoute(currentRoute())) return;
+    /* IMPORTANT: use the real app route. "healthcare/staff" is not a route
+       understood by app.js and can fall through to the public services page. */
+    history.replaceState(null, "", "#/staff");
+  };
+
+  /* Capture-phase + synchronous replaceState means app.js never renders the
+     patient route on a staff device, so there is no blank-frame/flicker race. */
   window.addEventListener("hashchange", () => {
-    if (isPatientVisitRoute(currentRoute()) && isStaff()) {
-      setTimeout(restoreStaffRoute, 0);
-    } else {
-      rememberStaffRoute();
-    }
+    if (isStaff() && isPatientVisitRoute(currentRoute())) restoreStaffRoute();
+    else rememberStaffRoute();
   }, true);
-  window.addEventListener("carepath:route-rendered", () => {
-    if (isStaff() && isPatientVisitRoute(currentRoute())) setTimeout(restoreStaffRoute, 0);
-  });
-  setTimeout(restoreStaffRoute, 0);
+
+  rememberStaffRoute();
+  restoreStaffRoute();
 })();
