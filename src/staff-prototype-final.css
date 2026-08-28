@@ -1,58 +1,180 @@
-/* Final prototype-safe staff UI: simplify the desk and make non-live controls explicit. */
+/* Final staff desk presentation: queue first, current patient second. */
 
-/* The staff dashboard should focus on the current patient, not a wall of controls. */
-.cp-staff-grid{
-  grid-template-columns:1fr!important;
-  gap:14px!important;
+/* Older polish layers hid the queue. Bring it back as a primary part of the desk. */
+.cp-dashboard .cp-queue-preview,
+.carepath-simple-staff .cp-queue-preview{
+  display:block!important;
 }
 
-.cp-staff-card.cp-state-card{order:1}
-.cp-action-card{order:2!important}
-
-/* Keep the controls visible as a clear prototype affordance, but never imply they are live. */
-.cp-action-card{
-  margin-top:2px;
-  background:#fbfcfb!important;
+/* The staff dashboard is now a two-column working view:
+   left = live queue, right = selected patient + contextual action. */
+.cp-dashboard{
+  display:grid!important;
+  grid-template-columns:minmax(360px,1fr) minmax(420px,1.18fr);
+  gap:14px;
+  align-items:start;
 }
 
-.cp-action-card::after{
-  content:"Live staff controls are disabled in this prototype.";
-  display:block;
-  margin-top:12px;
-  padding:10px 12px;
-  border-radius:10px;
-  background:#f1f5f4;
-  color:#718687;
-  font-size:11px;
-  font-weight:700;
-  line-height:1.4;
+.cp-dashboard .cp-metric-grid{
+  grid-column:1 / -1;
+  display:grid!important;
+  margin-bottom:0!important;
 }
 
-.cp-context-action button,
-.cp-staff-actions button{
-  background:#f1f5f4!important;
-  color:#839596!important;
-  border-color:#dce5e3!important;
+.cp-dashboard .cp-staff-grid{
+  display:contents!important;
+}
+
+.cp-dashboard .cp-queue-preview{
+  grid-column:1;
+  grid-row:2 / span 2;
+  margin-top:0!important;
+  order:initial!important;
+}
+
+.cp-dashboard .cp-state-card{
+  grid-column:2;
+  grid-row:2;
+  order:initial!important;
+  min-height:250px;
+}
+
+.cp-dashboard .cp-action-card{
+  grid-column:2;
+  grid-row:3;
+  order:initial!important;
+}
+
+.cp-dashboard .cp-staff-journey{
+  grid-column:1 / -1;
+  grid-row:4;
+  margin-top:0!important;
+}
+
+/* Make the selected patient feel like the focal point. */
+.cp-dashboard .cp-state-card .cp-card-title b{
+  font-size:22px;
+}
+
+.cp-dashboard .cp-state-card .cp-patient-meta{
+  font-size:13px;
+}
+
+/* Queue rows are intentionally visible and scannable. */
+.cp-dashboard .cp-queue-preview .cp-card-title{
+  margin-bottom:8px;
+}
+
+.cp-dashboard .cp-queue-preview .cp-patient-row{
+  min-height:58px;
+}
+
+.cp-dashboard .cp-queue-preview .cp-patient-row.selected{
+  background:#dff2ed;
+  outline:1px solid rgba(12,114,114,.18);
+}
+
+.cp-dashboard .cp-queue-preview .cp-patient-row.selected .cp-patient-status{
+  color:#0c6f73;
+}
+
+/* The station header should be a compact instruction, not a second dashboard. */
+.cp-station-screen{
+  margin-bottom:14px!important;
+}
+
+.cp-station-workspace{
+  padding:17px 19px!important;
+  border-radius:18px!important;
+  box-shadow:0 7px 22px rgba(18,48,50,.05)!important;
+}
+
+.cp-station-workspace-head{
+  margin-bottom:12px!important;
+  align-items:center!important;
+}
+
+.cp-station-workspace-head h3{
+  font-size:20px!important;
+}
+
+.cp-station-workspace-head p{
+  font-size:11px!important;
+}
+
+.cp-station-actions{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px!important;
+}
+
+.cp-station-actions button{
+  padding:11px 12px!important;
+  font-size:11px!important;
+}
+
+/* All actions are quiet by default. The final staff-layout JS promotes only
+   the one action that matches the selected patient's current state. */
+.cp-station-actions button{
+  background:#f5f8f7!important;
+  color:#789092!important;
+  border-color:#dfe9e6!important;
   box-shadow:none!important;
-  cursor:not-allowed!important;
-  transform:none!important;
-  filter:none!important;
-  opacity:.78;
-  pointer-events:none;
 }
 
-.cp-context-action>span{
-  background:#f1f5f4!important;
-  color:#839596!important;
+.cp-station-actions button.required-action{
+  background:#0c7272!important;
+  color:#fff!important;
+  border-color:#0c7272!important;
+  box-shadow:0 8px 18px rgba(12,114,114,.18)!important;
 }
 
-/* Remove secondary controls that add noise without helping the demo. */
-.cp-staff-actions button[data-cp-staff="sms"]{
-  display:none!important;
+.cp-station-actions button.required-action span{
+  color:#fff!important;
+}
+
+/* Keep contextual actions usable in the demo. */
+.cp-action-card .cp-context-action button{
+  background:#0c7272!important;
+  color:#fff!important;
+  border-color:#0c7272!important;
+  cursor:pointer!important;
+  pointer-events:auto!important;
+  opacity:1!important;
+}
+
+.cp-action-card .cp-staff-actions button{
+  background:#fff!important;
+  color:#126f73!important;
+  border-color:rgba(12,102,107,.16)!important;
+  cursor:pointer!important;
+  pointer-events:auto!important;
+  opacity:1!important;
+}
+
+.cp-action-card::after{display:none!important}
+
+@media(max-width:1050px){
+  .cp-dashboard{
+    grid-template-columns:minmax(300px,1fr) minmax(340px,1fr);
+  }
 }
 
 @media(max-width:900px){
-  .cp-staff-grid{display:flex!important;flex-direction:column!important;gap:10px!important}
-  .cp-staff-card.cp-state-card{order:1}
-  .cp-action-card{order:2!important}
+  .cp-dashboard{
+    display:flex!important;
+    flex-direction:column!important;
+    gap:10px!important;
+  }
+  .cp-dashboard .cp-metric-grid,
+  .cp-dashboard .cp-queue-preview,
+  .cp-dashboard .cp-state-card,
+  .cp-dashboard .cp-action-card,
+  .cp-dashboard .cp-staff-journey{
+    width:100%;
+  }
+  .cp-dashboard .cp-queue-preview{order:1!important}
+  .cp-dashboard .cp-state-card{order:2!important;min-height:0}
+  .cp-dashboard .cp-action-card{order:3!important}
+  .cp-dashboard .cp-staff-journey{order:4!important}
+  .cp-station-actions{grid-template-columns:1fr!important}
 }
