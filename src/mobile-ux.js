@@ -1,20 +1,6 @@
 (() => {
   const MOBILE = () => window.matchMedia('(max-width: 760px)').matches;
 
-  function hideByHeading(text) {
-    if (!MOBILE()) return;
-    document.querySelectorAll('section, article, div').forEach((node) => {
-      if (node.dataset.mobileSimplified === 'true') return;
-      const heading = node.querySelector('h2,h3,h4,.eyebrow,.cp-card-title span,.cp-artifacts-head span,.cp-journey-rail-head span');
-      if (!heading) return;
-      const value = (heading.textContent || '').trim().toUpperCase();
-      if (!value.includes(text)) return;
-      const target = node.closest('section') || node;
-      target.dataset.mobileSimplified = 'true';
-      target.hidden = true;
-    });
-  }
-
   function addJourneyStyles() {
     if (document.querySelector('#carepath-mobile-journey-style')) return;
     const style = document.createElement('style');
@@ -64,11 +50,12 @@
   function apply() {
     markMobileStaff();
     if (!MOBILE()) return;
-    hideByHeading('LATEST VERIFIED EVENTS');
-    hideByHeading('ASSISTED JOURNEY TRACKING');
     simplifyJourneyRail();
   }
 
+  // Do not hide page sections by searching for heading text here.
+  // The previous implementation could hide an ancestor containing the
+  // whole mobile page when a shell control opened or the language changed.
   const observer = new MutationObserver(() => apply());
   observer.observe(document.documentElement, { childList: true, subtree: true });
   window.addEventListener('resize', apply, { passive: true });
