@@ -43,7 +43,8 @@
       patientStream = new EventSource(`/api/events?authoritative=${Date.now()}`);
       patientStream.addEventListener("journey", e => { try { patientApply(JSON.parse(e.data).journey); } catch {} });
       patientStream.addEventListener("reset", e => { try { patientApply(JSON.parse(e.data).journey); } catch {} });
-    } catch {}
+      patientStream.onerror = () => { try { patientStream.close(); } catch {} patientStream = null; };
+    } catch { patientStream = null; }
     clearInterval(patientPolling);
     patientPolling = setInterval(async () => {
       try { patientApply(await getJourney()); } catch {}
@@ -68,13 +69,12 @@
         COMPLETE_PHARMACY: ["PHARMACY"]
       };
       if (!allowed[type]?.includes(current.state)) {
-        throw new Error(`Ravi is currently ${String(current.state).replaceAll("_", " ")}. Refreshing the staff view.`);
+        throw new Error(`The staff screen was out of sync. Ravi is actually ${String(current.state).replaceAll("_", " ")}. Refreshing it now.`);
       }
       if (type === "CALL_PATIENT" && (current.queueAhead ?? 0) > 0) {
         throw new Error(`Ravi still has ${current.queueAhead} patient(s) ahead. Advance the queue first.`);
       }
-      const body = { role: "staff", type, ...extra };
-      const r = await fetch("/api/event", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const r = await fetch("/api/event", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role: "staff", type, ...extra }) });
       const data = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(data.error || "Could not update the shared journey.");
       return data.journey;
@@ -93,7 +93,19 @@
     if (!n) return;
     n.hidden = false;
     n.textContent = message;
-    setTimeout(() => { n.hidden = true; }, 3200);
+    setTimeout(() => { n.hidden = true; }, 3600);
+  }
+
+  function contextEventFromLabel(text) {
+    const t = text.toLowerCase();
+    if (t.includes("mark arrived")) return ["PATIENT_ARRIVED", { description: "Ravi arrived at the hospital" }];
+    if (t.includes("complete registration")) return ["CHECKED_IN", { queueAhead: 3, description: "Registration completed — Ravi joined the queue" }];
+    if (t.includes("advance queue")) return ["QUEUE_ADVANCED", { description: "Queue advanced" }];
+    if (t.includes("start consultation")) return ["START_CONSULTATION", { description: "Patient moved into consultation" }];
+    if (t.includes("complete consultation")) return ["COMPLETE_CONSULTATION", { description: "Consultation completed — lab is next" }];
+    if (t.includes("complete lab")) return ["COMPLETE_LAB", { description: "Lab step completed — pharmacy is next" }];
+    if (t.includes("complete pharmacy")) return ["COMPLETE_PHARMACY", { description: "Pharmacy step completed — visit done" }];
+    return [null, {}];
   }
 
   async function handleStaffClick(event) {
@@ -108,25 +120,8 @@
     let type = null;
     let extra = {};
     if (context) {
-      try {
-        const j = await getJourney();
-        type = ({
-          APPOINTMENT_CONFIRMED: "PATIENT_ARRIVED",
-          ARRIVED: "CHECKED_IN",
-          WAITING: "QUEUE_ADVANCED",
-          CALLED: "START_CONSULTATION",
-          CONSULTATION: "COMPLETE_CONSULTATION",
-          LAB: "COMPLETE_LAB",
-          PHARMACY: "COMPLETE_PHARMACY"
-        })[j.state];
-        if (type === "CHECKED_IN") extra = { queueAhead: 3, description: "Registration completed — Ravi joined the queue" };
-        else if (type === "PATIENT_ARRIVED") extra = { description: "Ravi arrived at the hospital" };
-        else if (type === "COMPLETE_CONSULTATION") extra = { description: "Consultation completed — lab is next" };
-        else if (type === "COMPLETE_LAB") extra = { description: "Lab step completed — pharmacy is next" };
-        else if (type === "COMPLETE_PHARMACY") extra = { description: "Pharmacy step completed — visit done" };
-        else if (type === "START_CONSULTATION") extra = { description: "Patient moved into consultation" };
-        else if (type === "QUEUE_ADVANCED") extra = { description: "Queue advanced" };
-      } catch (e) { staffNotice(e.message); return; }
+      [type, extra] = contextEventFromLabel(context.textContent || "");
+      if (!type) return;
     } else if (action.dataset.cpStaff === "call") {
       type = "CALL_PATIENT";
       extra = { description: "Token 42 called to Room 202" };
@@ -146,24 +141,19 @@
       await sendRaviEvent(type, extra);
       const j = await getJourney();
       staffNotice(`Shared journey updated · ${String(j.state).replaceAll("_", " ")}`);
-      // Let the existing staff shell catch the server event, then force a fresh authoritative read.
       setTimeout(() => window.location.reload(), 80);
     } catch (e) {
       staffNotice(e.message);
-      try {
-        const j = await getJourney();
-        if (j) setTimeout(() => window.location.reload(), 80);
-      } catch {}
+      setTimeout(() => window.location.reload(), 80);
     }
   }
 
   document.addEventListener("click", handleStaffClick, true);
 
   function boot() {
-    if (isPatient()) {
-      getJourney().then(j => { lastPatientKey = journeyKey(j); }).catch(() => {});
-      connectPatient();
-    }
+    if (!isPatient()) return;
+    getJourney().then(j => { lastPatientKey = journeyKey(j); }).catch(() => {});
+    connectPatient();
   }
 
   window.addEventListener("DOMContentLoaded", boot);
