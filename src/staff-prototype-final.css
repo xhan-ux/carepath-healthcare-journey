@@ -1,5 +1,13 @@
 /* Final staff desk presentation: queue first, current patient second. */
 
+/* Make the actual patient work area appear before the station shortcuts. */
+.cp-staff-content{
+  display:flex!important;
+  flex-direction:column!important;
+}
+.cp-staff-content > .cp-dashboard{order:1!important}
+.cp-staff-content > .cp-station-screen{order:2!important}
+
 /* Older polish layers hid the queue. Bring it back as a primary part of the desk. */
 .cp-dashboard .cp-queue-preview,
 .carepath-simple-staff .cp-queue-preview{
@@ -78,9 +86,10 @@
   color:#0c6f73;
 }
 
-/* The station header should be a compact instruction, not a second dashboard. */
+/* The station header is now a compact secondary control area below the queue/current view. */
 .cp-station-screen{
-  margin-bottom:14px!important;
+  margin-top:14px!important;
+  margin-bottom:0!important;
 }
 
 .cp-station-workspace{
@@ -112,7 +121,7 @@
   font-size:11px!important;
 }
 
-/* All actions are quiet by default. The final staff-layout JS promotes only
+/* All station actions are quiet by default. The final staff-layout JS promotes only
    the one action that matches the selected patient's current state. */
 .cp-station-actions button{
   background:#f5f8f7!important;
@@ -130,6 +139,14 @@
 
 .cp-station-actions button.required-action span{
   color:#fff!important;
+}
+
+.cp-required-note{
+  display:block;
+  margin-top:8px;
+  color:#708789;
+  font-size:10px;
+  font-weight:700;
 }
 
 /* Keep contextual actions usable in the demo. */
@@ -160,6 +177,7 @@
 }
 
 @media(max-width:900px){
+  .cp-staff-content{display:flex!important;flex-direction:column!important}
   .cp-dashboard{
     display:flex!important;
     flex-direction:column!important;
