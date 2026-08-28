@@ -1,0 +1,7 @@
+#carepath-on-way-toast{position:fixed;right:24px;top:88px;z-index:2147483647;display:flex;align-items:center;gap:11px;min-width:270px;max-width:360px;padding:13px 16px;border:1px solid rgba(12,102,107,.18);border-radius:15px;background:#fffdf8;color:#173f42;box-shadow:0 14px 38px rgba(18,56,58,.18);font:inherit;opacity:0;transform:translateY(-12px);pointer-events:none;transition:.22s ease}
+#carepath-on-way-toast.show{opacity:1;transform:translateY(0)}
+#carepath-on-way-toast>span:first-child{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:#dff1ed;color:#0c7b7c;font-weight:900;flex:none}
+#carepath-on-way-toast b,#carepath-on-way-toast small{display:block}
+#carepath-on-way-toast b{font-size:13px}
+#carepath-on-way-toast small{margin-top:3px;color:#6d8586;font-size:10px}
+@media(max-width:600px){#carepath-on-way-toast{left:14px;right:14px;top:74px;min-width:0;max-width:none}}
