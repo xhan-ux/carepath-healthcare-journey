@@ -1,0 +1,24 @@
+/* Final staff dashboard simplification: keep the controls that matter, remove repeated summary blocks. */
+.cp-metric-grid,
+.cp-staff-journey,
+.cp-queue-preview{display:none!important}
+
+.cp-staff-grid{grid-template-columns:1.2fr .8fr;gap:14px}
+.cp-staff-card.cp-state-card{min-height:0}
+.cp-staff-stats{grid-template-columns:1fr 1fr}
+.cp-staff-stats div:nth-child(4){display:none}
+
+/* The contextual primary action already covers the current journey step. */
+.cp-staff-actions button[data-cp-staff="complete"],
+.cp-staff-actions button[data-cp-staff="sms"]{display:none!important}
+
+.cp-action-card .cp-context-action{margin-top:10px;padding-bottom:10px}
+.cp-action-card .cp-staff-actions{margin-top:10px}
+
+/* Make the reset affordance feel like a utility, not another dashboard card. */
+.cp-staff-top .cp-demo-reset{margin-top:10px}
+
+@media(max-width:900px){
+  .cp-staff-grid{display:flex;flex-direction:column;gap:10px}
+  .cp-action-card{order:-1}
+}
