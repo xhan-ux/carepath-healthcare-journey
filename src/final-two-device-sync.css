@@ -1,0 +1,11 @@
+#carepath-live-notice{position:fixed;right:24px;top:88px;z-index:2147483647;display:flex;align-items:center;gap:11px;min-width:270px;max-width:360px;padding:13px 16px;border:1px solid rgba(12,102,107,.18);border-radius:15px;background:#fffdf8;color:#173f42;box-shadow:0 14px 38px rgba(18,56,58,.18);font:inherit;opacity:0;transform:translateY(-12px);pointer-events:none;transition:.22s ease}
+#carepath-live-notice.show{opacity:1;transform:translateY(0)}
+#carepath-live-notice>span{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:#dff1ed;color:#0c7b7c;font-weight:900;flex:none}
+#carepath-live-notice strong,#carepath-live-notice small{display:block}
+#carepath-live-notice strong{font-size:13px}
+#carepath-live-notice small{margin-top:3px;color:#6d8586;font-size:10px}
+.carepath-simple-staff .cp-staff-journey,.carepath-simple-staff .cp-queue-preview,.carepath-simple-staff .cp-metric-grid{display:none!important}
+.carepath-simple-staff .cp-staff-grid{grid-template-columns:1fr 1fr;gap:14px}
+.carepath-simple-staff .cp-staff-actions button[data-cp-staff="complete"],.carepath-simple-staff .cp-staff-actions button[data-cp-staff="sms"]{display:none!important}
+@media(max-width:900px){.carepath-simple-staff .cp-staff-grid{display:flex;flex-direction:column;gap:10px}.carepath-simple-staff .cp-action-card{order:-1}}
+@media(max-width:600px){#carepath-live-notice{left:14px;right:14px;top:74px;min-width:0;max-width:none}}
