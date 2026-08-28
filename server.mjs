@@ -19,7 +19,7 @@ function json(res,status,payload){res.writeHead(status,{"Content-Type":"applicat
 function broadcast(eventName,payload){const message=`event: ${eventName}\ndata: ${JSON.stringify(payload)}\n\n`;for(const res of clients)res.write(message);}
 function readBody(req){return new Promise((resolve,reject)=>{let body="";req.on("data",chunk=>{body+=chunk;if(body.length>100_000){reject(new Error("Request body too large."));req.destroy();}});req.on("end",()=>{try{resolve(body?JSON.parse(body):{});}catch{reject(new Error("Invalid JSON body."));}});req.on("error",reject);});}
 function isKnownRole(role){return role==="patient"||role==="staff";}
-function roleCanSend(role,type){if(role==="patient")return type===EventType.PATIENT_ARRIVED;if(role==="staff")return [EventType.CHECKED_IN,EventType.QUEUE_ADVANCED,EventType.ROOM_CHANGED,EventType.CALL_PATIENT,EventType.START_CONSULTATION,EventType.COMPLETE_CONSULTATION,EventType.COMPLETE_LAB,EventType.COMPLETE_PHARMACY].includes(type);return false;}
+function roleCanSend(role,type){if(role==="patient")return [EventType.PATIENT_ARRIVED,EventType.PATIENT_ON_WAY].includes(type);if(role==="staff")return [EventType.CHECKED_IN,EventType.QUEUE_ADVANCED,EventType.ROOM_CHANGED,EventType.CALL_PATIENT,EventType.START_CONSULTATION,EventType.COMPLETE_CONSULTATION,EventType.COMPLETE_LAB,EventType.COMPLETE_PHARMACY].includes(type);return false;}
 
 function extractOutputText(data){
   if(typeof data?.output_text==="string")return data.output_text.trim();
