@@ -81,4 +81,7 @@ export function applyEvent(journey, event, now = new Date()) {
   return next;
 }
 
-export function canApplyEvent(journey, type) { return !!allowedTransitions[type]?.includes(type === EventType.CALL_PATIENT && (journey.queueAhead ?? 0) > 0 ? "NEVER" : journey.state); }
+export function canApplyEvent(journey, type) {
+  if (type === EventType.CALL_PATIENT && (journey.queueAhead ?? 0) > 0) return false;
+  return !!allowedTransitions[type]?.includes(journey.state);
+}
