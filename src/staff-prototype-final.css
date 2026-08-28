@@ -1,0 +1,58 @@
+/* Final prototype-safe staff UI: simplify the desk and make non-live controls explicit. */
+
+/* The staff dashboard should focus on the current patient, not a wall of controls. */
+.cp-staff-grid{
+  grid-template-columns:1fr!important;
+  gap:14px!important;
+}
+
+.cp-staff-card.cp-state-card{order:1}
+.cp-action-card{order:2!important}
+
+/* Keep the controls visible as a clear prototype affordance, but never imply they are live. */
+.cp-action-card{
+  margin-top:2px;
+  background:#fbfcfb!important;
+}
+
+.cp-action-card::after{
+  content:"Live staff controls are disabled in this prototype.";
+  display:block;
+  margin-top:12px;
+  padding:10px 12px;
+  border-radius:10px;
+  background:#f1f5f4;
+  color:#718687;
+  font-size:11px;
+  font-weight:700;
+  line-height:1.4;
+}
+
+.cp-context-action button,
+.cp-staff-actions button{
+  background:#f1f5f4!important;
+  color:#839596!important;
+  border-color:#dce5e3!important;
+  box-shadow:none!important;
+  cursor:not-allowed!important;
+  transform:none!important;
+  filter:none!important;
+  opacity:.78;
+  pointer-events:none;
+}
+
+.cp-context-action>span{
+  background:#f1f5f4!important;
+  color:#839596!important;
+}
+
+/* Remove secondary controls that add noise without helping the demo. */
+.cp-staff-actions button[data-cp-staff="sms"]{
+  display:none!important;
+}
+
+@media(max-width:900px){
+  .cp-staff-grid{display:flex!important;flex-direction:column!important;gap:10px!important}
+  .cp-staff-card.cp-state-card{order:1}
+  .cp-action-card{order:2!important}
+}
