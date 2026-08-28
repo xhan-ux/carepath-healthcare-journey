@@ -31,7 +31,6 @@
   function updateStation() {
     const host = document.querySelector(".cp-station-screen");
     if (!host) return;
-
     const buttons = [...host.querySelectorAll("[data-station-action]")];
     if (!buttons.length) return;
 
@@ -56,19 +55,13 @@
     }
   }
 
-  function init() {
-    updateStation();
-    setTimeout(updateStation, 100);
-    setTimeout(updateStation, 400);
-  }
-
   document.addEventListener("click", event => {
-    if (event.target.closest("[data-patient],[data-cp-station],[data-nav]")) setTimeout(updateStation, 60);
+    if (event.target.closest("[data-patient],[data-cp-station],[data-nav]")) setTimeout(updateStation, 80);
   });
   window.addEventListener("storage", event => {
-    if (event.key === STATION_KEY) setTimeout(updateStation, 60);
+    if (event.key === STATION_KEY) setTimeout(updateStation, 80);
   });
-  window.addEventListener("carepath:route-rendered", () => setTimeout(updateStation, 60));
-  new MutationObserver(() => updateStation()).observe(document.body, { childList:true, subtree:true });
-  init();
+  window.addEventListener("carepath:route-rendered", () => setTimeout(updateStation, 80));
+  setInterval(updateStation, 500);
+  updateStation();
 })();
