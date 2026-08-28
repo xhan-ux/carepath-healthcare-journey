@@ -11,6 +11,7 @@ export const JourneyState = Object.freeze({
 
 export const EventType = Object.freeze({
   PATIENT_ARRIVED: "PATIENT_ARRIVED",
+  PATIENT_ON_WAY: "PATIENT_ON_WAY",
   CHECKED_IN: "CHECKED_IN",
   QUEUE_ADVANCED: "QUEUE_ADVANCED",
   ROOM_CHANGED: "ROOM_CHANGED",
@@ -36,6 +37,7 @@ export const initialJourney = Object.freeze({
 
 const allowedTransitions = {
   [EventType.PATIENT_ARRIVED]: [JourneyState.APPOINTMENT_CONFIRMED],
+  [EventType.PATIENT_ON_WAY]: [JourneyState.CALLED],
   [EventType.CHECKED_IN]: [JourneyState.ARRIVED],
   [EventType.QUEUE_ADVANCED]: [JourneyState.WAITING],
   [EventType.ROOM_CHANGED]: [JourneyState.ARRIVED, JourneyState.WAITING, JourneyState.CALLED, JourneyState.CONSULTATION],
@@ -59,6 +61,7 @@ export function applyEvent(journey, event, now = new Date()) {
 
   switch (event.type) {
     case EventType.PATIENT_ARRIVED: next.state = JourneyState.ARRIVED; break;
+    case EventType.PATIENT_ON_WAY: break;
     case EventType.CHECKED_IN: next.state = JourneyState.WAITING; next.queueAhead = event.queueAhead ?? 3; break;
     case EventType.QUEUE_ADVANCED: next.queueAhead = Math.max(0, (journey.queueAhead ?? 0) - 1); break;
     case EventType.ROOM_CHANGED: if (!event.room) throw new Error("ROOM_CHANGED needs a room."); next.room = event.room; break;
