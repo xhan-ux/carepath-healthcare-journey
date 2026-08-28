@@ -1,164 +1,64 @@
-/* Authoritative two-device bridge for the synthetic Ravi demo.
-   Staff actions for Ravi are validated by /api/state and sent to /api/event.
-   Patient screens subscribe to the same SSE stream and refresh to the verified state. */
+/* Authoritative staff-side bridge. Patient realtime is owned by app.js only. */
 (() => {
-  const ROLE_KEYS = ["carepath:role:v6", "carepath:demo-role:v2", "carepath:role:v2"];
-  const role = () => ROLE_KEYS.map(k => { try { return sessionStorage.getItem(k); } catch { return null; } }).find(Boolean) || null;
-  const isStaff = () => role() === "staff";
-  const isPatient = () => role() === "patient";
-  const RAVI = "DEMO-042";
-  let patientStream = null;
-  let patientPolling = null;
-  let lastPatientKey = "";
-  let syncing = false;
-
-  const statePath = state => String(state || "APPOINTMENT_CONFIRMED").toLowerCase().replaceAll("_", "-");
-  const journeyKey = j => `${j?.state || ""}|${j?.room || ""}|${j?.queueAhead ?? ""}|${j?.lastUpdated || ""}`;
-
-  async function getJourney() {
-    const r = await fetch(`/api/state?authoritative=${Date.now()}`, { cache: "no-store" });
-    const data = await r.json().catch(() => ({}));
-    if (!r.ok || !data.journey) throw new Error(data.error || "Could not read the shared journey.");
-    return data.journey;
+  const KEYS=["carepath:role:v6","carepath:demo-role:v2","carepath:role:v2"];
+  const role=()=>KEYS.map(k=>{try{return sessionStorage.getItem(k)}catch{return null}}).find(Boolean)||null;
+  const isStaff=()=>role()==="staff";
+  const RAVI="DEMO-042";
+  let busy=false;
+  async function state(){
+    const r=await fetch(`/api/state?authoritative=${Date.now()}`,{cache:"no-store"});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||!d.journey)throw new Error(d.error||"Could not read shared journey.");
+    return d.journey;
   }
-
-  function patientApply(j) {
-    if (!isPatient() || !j?.patient || j.patient.id !== RAVI) return;
-    const next = journeyKey(j);
-    if (!lastPatientKey) {
-      lastPatientKey = next;
-      return;
-    }
-    if (next === lastPatientKey) return;
-    lastPatientKey = next;
-    const target = `#/healthcare/visit/${statePath(j.state)}`;
-    if (location.hash !== target) history.replaceState(null, "", target);
-    setTimeout(() => location.reload(), 40);
+  const allowed={
+    PATIENT_ARRIVED:["APPOINTMENT_CONFIRMED"],CHECKED_IN:["ARRIVED"],QUEUE_ADVANCED:["WAITING"],
+    ROOM_CHANGED:["ARRIVED","WAITING","CALLED","CONSULTATION"],CALL_PATIENT:["WAITING"],
+    START_CONSULTATION:["CALLED"],COMPLETE_CONSULTATION:["CONSULTATION"],COMPLETE_LAB:["LAB"],COMPLETE_PHARMACY:["PHARMACY"]
+  };
+  async function send(type,extra={}){
+    if(busy)return;
+    busy=true;
+    try{
+      const j=await state();
+      if(j.patient?.id!==RAVI)throw new Error("Shared demo patient is not Ravi Kumar.");
+      if(!allowed[type]?.includes(j.state))throw new Error(`Staff view was stale. Ravi is actually ${String(j.state).replaceAll("_"," ")}. Refreshing.`);
+      if(type==="CALL_PATIENT"&&(j.queueAhead??0)>0)throw new Error(`Ravi still has ${j.queueAhead} patient(s) ahead.`);
+      const r=await fetch("/api/event",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({role:"staff",type,...extra})});
+      const d=await r.json().catch(()=>({}));
+      if(!r.ok)throw new Error(d.error||"Could not update shared journey.");
+      return d.journey;
+    }finally{busy=false}
   }
-
-  function connectPatient() {
-    if (!isPatient() || !window.EventSource || !location.protocol.startsWith("http")) return;
-    if (patientStream) patientStream.close();
-    try {
-      patientStream = new EventSource(`/api/events?authoritative=${Date.now()}`);
-      patientStream.addEventListener("journey", e => { try { patientApply(JSON.parse(e.data).journey); } catch {} });
-      patientStream.addEventListener("reset", e => { try { patientApply(JSON.parse(e.data).journey); } catch {} });
-      patientStream.onerror = () => { try { patientStream.close(); } catch {} patientStream = null; };
-    } catch { patientStream = null; }
-    clearInterval(patientPolling);
-    patientPolling = setInterval(async () => {
-      try { patientApply(await getJourney()); } catch {}
-    }, 1500);
+  function selectedRavi(){return !!document.querySelector('.cp-patient-row[data-patient="DEMO-042"]')?.classList.contains("selected")}
+  function notice(msg){const n=document.querySelector(".cp-staff-notice");if(!n)return;n.hidden=false;n.textContent=msg;setTimeout(()=>n.hidden=true,2600)}
+  function contextType(text){
+    const t=text.toLowerCase();
+    if(t.includes("mark arrived"))return ["PATIENT_ARRIVED",{description:"Ravi arrived at the hospital"}];
+    if(t.includes("complete registration"))return ["CHECKED_IN",{queueAhead:3,description:"Registration completed — Ravi joined the queue"}];
+    if(t.includes("advance queue"))return ["QUEUE_ADVANCED",{description:"Queue advanced"}];
+    if(t.includes("start consultation"))return ["START_CONSULTATION",{description:"Patient moved into consultation"}];
+    if(t.includes("complete consultation"))return ["COMPLETE_CONSULTATION",{description:"Consultation completed — lab is next"}];
+    if(t.includes("complete lab"))return ["COMPLETE_LAB",{description:"Lab step completed — pharmacy is next"}];
+    if(t.includes("complete pharmacy"))return ["COMPLETE_PHARMACY",{description:"Pharmacy step completed — visit done"}];
+    return [null,{}];
   }
-
-  async function sendRaviEvent(type, extra = {}) {
-    if (syncing) return;
-    syncing = true;
-    try {
-      const current = await getJourney();
-      if (current.patient?.id !== RAVI) throw new Error("The shared demo patient is not Ravi Kumar.");
-      const allowed = {
-        PATIENT_ARRIVED: ["APPOINTMENT_CONFIRMED"],
-        CHECKED_IN: ["ARRIVED"],
-        QUEUE_ADVANCED: ["WAITING"],
-        ROOM_CHANGED: ["ARRIVED", "WAITING", "CALLED", "CONSULTATION"],
-        CALL_PATIENT: ["WAITING"],
-        START_CONSULTATION: ["CALLED"],
-        COMPLETE_CONSULTATION: ["CONSULTATION"],
-        COMPLETE_LAB: ["LAB"],
-        COMPLETE_PHARMACY: ["PHARMACY"]
-      };
-      if (!allowed[type]?.includes(current.state)) {
-        throw new Error(`The staff screen was out of sync. Ravi is actually ${String(current.state).replaceAll("_", " ")}. Refreshing it now.`);
-      }
-      if (type === "CALL_PATIENT" && (current.queueAhead ?? 0) > 0) {
-        throw new Error(`Ravi still has ${current.queueAhead} patient(s) ahead. Advance the queue first.`);
-      }
-      const r = await fetch("/api/event", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role: "staff", type, ...extra }) });
-      const data = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(data.error || "Could not update the shared journey.");
-      return data.journey;
-    } finally {
-      syncing = false;
-    }
-  }
-
-  function selectedRavi() {
-    const row = document.querySelector('.cp-patient-row[data-patient="DEMO-042"]');
-    return !!row?.classList.contains("selected");
-  }
-
-  function staffNotice(message) {
-    let n = document.querySelector(".cp-staff-notice");
-    if (!n) return;
-    n.hidden = false;
-    n.textContent = message;
-    setTimeout(() => { n.hidden = true; }, 3600);
-  }
-
-  function contextEventFromLabel(text) {
-    const t = text.toLowerCase();
-    if (t.includes("mark arrived")) return ["PATIENT_ARRIVED", { description: "Ravi arrived at the hospital" }];
-    if (t.includes("complete registration")) return ["CHECKED_IN", { queueAhead: 3, description: "Registration completed — Ravi joined the queue" }];
-    if (t.includes("advance queue")) return ["QUEUE_ADVANCED", { description: "Queue advanced" }];
-    if (t.includes("start consultation")) return ["START_CONSULTATION", { description: "Patient moved into consultation" }];
-    if (t.includes("complete consultation")) return ["COMPLETE_CONSULTATION", { description: "Consultation completed — lab is next" }];
-    if (t.includes("complete lab")) return ["COMPLETE_LAB", { description: "Lab step completed — pharmacy is next" }];
-    if (t.includes("complete pharmacy")) return ["COMPLETE_PHARMACY", { description: "Pharmacy step completed — visit done" }];
-    return [null, {}];
-  }
-
-  async function handleStaffClick(event) {
-    if (!isStaff()) return;
-    const context = event.target.closest?.("[data-cp-context]");
-    const action = event.target.closest?.("[data-cp-staff]");
-    if (!context && !action) return;
-    if (!selectedRavi()) return;
-    event.preventDefault();
-    event.stopImmediatePropagation();
-
-    let type = null;
-    let extra = {};
-    if (context) {
-      [type, extra] = contextEventFromLabel(context.textContent || "");
-      if (!type) return;
-    } else if (action.dataset.cpStaff === "call") {
-      type = "CALL_PATIENT";
-      extra = { description: "Token 42 called to Room 202" };
-    } else if (action.dataset.cpStaff === "room") {
-      const j = await getJourney().catch(() => null);
-      if (!j) return;
-      type = "ROOM_CHANGED";
-      extra = { room: j.room === "202" ? "204" : "202", description: `Consultation room changed from ${j.room} to ${j.room === "202" ? "204" : "202"}` };
-    } else if (action.dataset.cpStaff === "complete") {
-      type = "COMPLETE_CONSULTATION";
-      extra = { description: "Consultation completed — lab is next" };
-    } else {
-      return;
-    }
-
-    try {
-      await sendRaviEvent(type, extra);
-      const j = await getJourney();
-      staffNotice(`Shared journey updated · ${String(j.state).replaceAll("_", " ")}`);
-      setTimeout(() => window.location.reload(), 80);
-    } catch (e) {
-      staffNotice(e.message);
-      setTimeout(() => window.location.reload(), 80);
-    }
-  }
-
-  document.addEventListener("click", handleStaffClick, true);
-
-  function boot() {
-    if (!isPatient()) return;
-    getJourney().then(j => { lastPatientKey = journeyKey(j); }).catch(() => {});
-    connectPatient();
-  }
-
-  window.addEventListener("DOMContentLoaded", boot);
-  setInterval(() => {
-    if (isPatient() && !patientStream) connectPatient();
-  }, 1000);
-  setTimeout(boot, 700);
+  document.addEventListener("click",async e=>{
+    if(!isStaff()||!selectedRavi())return;
+    const c=e.target.closest?.("[data-cp-context]");
+    const a=e.target.closest?.("[data-cp-staff]");
+    if(!c&&!a)return;
+    let type,extra;
+    if(c)[type,extra]=contextType(c.textContent||"");
+    else if(a.dataset.cpStaff==="call")[type,extra]=["CALL_PATIENT",{description:"Token 42 called to Room 202"}];
+    else if(a.dataset.cpStaff==="room"){
+      const j=await state().catch(()=>null);if(!j)return;
+      [type,extra]=["ROOM_CHANGED",{room:j.room==="202"?"204":"202",description:`Consultation room changed from ${j.room} to ${j.room==="202"?"204":"202"}`}];
+    }else if(a.dataset.cpStaff==="complete")[type,extra]=["COMPLETE_CONSULTATION",{description:"Consultation completed — lab is next"}];
+    else return;
+    if(!type)return;
+    e.preventDefault();e.stopImmediatePropagation();
+    try{const j=await send(type,extra);notice(`Shared journey updated · ${String(j.state).replaceAll("_"," ")}`);setTimeout(()=>location.reload(),50)}
+    catch(err){notice(err.message);setTimeout(()=>location.reload(),50)}
+  },true);
 })();
