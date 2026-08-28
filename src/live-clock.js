@@ -6,11 +6,20 @@
   }).format(new Date());
 
   const update = () => {
-    const el = document.querySelector("#last-updated");
-    if (el) el.textContent = `Updated ${formatNow()}`;
+    const el = document.querySelector(".visit-page .visit-status small");
+    if (!el) return;
+    const value = `Updated ${formatNow()}`;
+    if (el.textContent !== value) el.textContent = value;
   };
 
   update();
   setInterval(update, 1000);
-  new MutationObserver(update).observe(document.body, { childList: true, subtree: true });
+
+  const app = document.querySelector("#app");
+  if (app) {
+    new MutationObserver(() => requestAnimationFrame(update)).observe(app, {
+      childList: true,
+      subtree: true
+    });
+  }
 })();
