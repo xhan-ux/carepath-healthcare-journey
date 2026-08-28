@@ -50,6 +50,7 @@ const allowedTransitions = {
 
 function assertTransition(journey, type) {
   if (!allowedTransitions[type]?.includes(journey.state)) throw new Error(`${type} is not available while journey is ${journey.state}.`);
+  if (type === EventType.CALL_PATIENT && (journey.queueAhead ?? 0) > 0) throw new Error("The patient is not next yet.");
 }
 
 function formatTime(date) { return new Intl.DateTimeFormat("en-IN", { hour: "numeric", minute: "2-digit" }).format(date); }
@@ -80,4 +81,4 @@ export function applyEvent(journey, event, now = new Date()) {
   return next;
 }
 
-export function canApplyEvent(journey, type) { return !!allowedTransitions[type]?.includes(journey.state); }
+export function canApplyEvent(journey, type) { return !!allowedTransitions[type]?.includes(type === EventType.CALL_PATIENT && (journey.queueAhead ?? 0) > 0 ? "NEVER" : journey.state); }
