@@ -38,3 +38,13 @@ test("a patient cannot be called while the queue is ahead", () => {
   journey = applyEvent(journey, { type: EventType.CHECKED_IN, queueAhead: 2 }, time);
   assert.throws(() => applyEvent(journey, { type: EventType.CALL_PATIENT }, time), /The patient is not next yet/);
 });
+
+test("a called patient can signal that they are on the way without changing state", () => {
+  let journey = applyEvent(initialJourney, { type: EventType.PATIENT_ARRIVED }, time);
+  journey = applyEvent(journey, { type: EventType.CHECKED_IN, queueAhead: 0 }, time);
+  journey = applyEvent(journey, { type: EventType.CALL_PATIENT }, time);
+  const next = applyEvent(journey, { type: EventType.PATIENT_ON_WAY, description: "Patient is on the way" }, time);
+  assert.equal(next.state, JourneyState.CALLED);
+  assert.equal(next.events.at(-1).type, EventType.PATIENT_ON_WAY);
+  assert.equal(next.events.at(-1).description, "Patient is on the way");
+});
