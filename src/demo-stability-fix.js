@@ -1,11 +1,9 @@
 /* Final demo stability layer.
-   Keeps the staff console visually isolated from the patient login route,
-   prevents shared journey events from blanking the patient screen, and gives
-   the mobile staff controls one consistent visual language. */
+   Staff and patient browsers share journey state, but each browser owns its UI route. */
 (() => {
   const ROLE_KEYS = ["carepath:role:v6", "carepath:demo-role:v2", "carepath:role:v2"];
-  const isStaff = () => ROLE_KEYS.some((key) => sessionStorage.getItem(key) === "staff");
-  const isPatient = () => ROLE_KEYS.some((key) => sessionStorage.getItem(key) === "patient");
+  const isStaff = () => ROLE_KEYS.some((key) => { try { return sessionStorage.getItem(key) === "staff"; } catch { return false; } });
+  const isPatient = () => ROLE_KEYS.some((key) => { try { return sessionStorage.getItem(key) === "patient"; } catch { return false; } });
   const route = () => location.hash.replace(/^#\/?/, "") || "services";
 
   function installStyle() {
@@ -13,41 +11,17 @@
     const style = document.createElement("style");
     style.id = "cp-demo-stability-style";
     style.textContent = `
-      /* Staff console: never show the underlying patient login page. */
       body.cp-staff-active .login-page,
       body.cp-staff-active #app:has(.login-page) { display:none !important; }
       body.cp-staff-active .cp-staff-command { display:block !important; }
-
-      /* Consistent, presentation-ready staff controls on small screens. */
       .cp-staff-command .cp-staff-actions{display:grid!important;grid-template-columns:1fr 1fr;gap:10px!important;margin-top:16px!important}
-      .cp-staff-command .cp-staff-actions button,
-      .cp-staff-command .cp-context-action button{
-        box-sizing:border-box!important;
-        min-height:52px!important;
-        width:100%!important;
-        margin:0!important;
-        padding:13px 16px!important;
-        border-radius:16px!important;
-        border:1px solid rgba(12,102,107,.22)!important;
-        background:#0c8084!important;
-        color:#fff!important;
-        font:inherit!important;
-        font-weight:700!important;
-        line-height:1.2!important;
-        box-shadow:none!important;
-        text-align:left!important;
-      }
+      .cp-staff-command .cp-staff-actions button,.cp-staff-command .cp-context-action button{box-sizing:border-box!important;min-height:52px!important;width:100%!important;margin:0!important;padding:13px 16px!important;border-radius:16px!important;border:1px solid rgba(12,102,107,.22)!important;background:#0c8084!important;color:#fff!important;font:inherit!important;font-weight:700!important;line-height:1.2!important;box-shadow:none!important;text-align:left!important}
       .cp-staff-command .cp-context-action button{font-size:16px!important;min-height:54px!important}
-      .cp-staff-command .cp-staff-actions button:nth-child(2),
-      .cp-staff-command .cp-staff-actions button:nth-child(4){background:#fff!important;color:#145f63!important}
+      .cp-staff-command .cp-staff-actions button:nth-child(2),.cp-staff-command .cp-staff-actions button:nth-child(4){background:#fff!important;color:#145f63!important}
       .cp-staff-command .cp-staff-actions button:nth-child(3){background:#fff7e3!important;color:#6e5515!important;border-color:rgba(110,85,21,.18)!important}
       .cp-staff-command .cp-staff-actions button.muted{background:#eef4f3!important;color:#537173!important;border-color:rgba(12,102,107,.10)!important}
-      .cp-staff-command .cp-staff-actions button span,
-      .cp-staff-command .cp-context-action button span{float:right!important;font-weight:800!important}
-      @media(max-width:700px){
-        .cp-staff-command .cp-staff-actions{grid-template-columns:1fr!important}
-        .cp-staff-command .cp-staff-actions button{min-height:54px!important}
-      }
+      .cp-staff-command .cp-staff-actions button span,.cp-staff-command .cp-context-action button span{float:right!important;font-weight:800!important}
+      @media(max-width:700px){.cp-staff-command .cp-staff-actions{grid-template-columns:1fr!important}.cp-staff-command .cp-staff-actions button{min-height:54px!important}}
     `;
     document.head.appendChild(style);
   }
@@ -56,28 +30,18 @@
     installStyle();
     document.body.classList.toggle("cp-staff-active", isStaff());
     document.body.classList.toggle("cp-patient-active", isPatient());
-
-    if (isStaff()) {
-      document.querySelectorAll(".login-page").forEach((el) => { el.style.display = "none"; });
-    }
+    if (isStaff()) document.querySelectorAll(".login-page").forEach((el) => { el.style.display = "none"; });
   }
 
-  /* If the shared state event changes the patient's route, do not allow the
-     staff browser to become a patient page. The staff console owns that device. */
+  /* Do not dispatch another hashchange here. The original hashchange event is
+     already being handled in capture phase by staff-route-guard.js. Dispatching
+     a second synthetic event was the source of the navigation race. */
   function guardStaffRoute() {
     if (!isStaff()) return;
-    const r = route();
-    if (r.startsWith("healthcare/visit")) {
-      const target = sessionStorage.getItem("carepath:last-staff-route:v1") || "healthcare/staff";
-      if (r !== target) {
-        history.replaceState(null, "", `#/${target}`);
-        window.dispatchEvent(new HashChangeEvent("hashchange"));
-      }
-    }
+    if (!route().startsWith("healthcare/visit")) return;
+    history.replaceState(null, "", "#/staff");
   }
 
-  /* Patient fallback: if a route renderer leaves #app empty after a shared
-     event, put a small but complete journey card back on screen. */
   async function patientFallback() {
     if (!isPatient() || !route().startsWith("healthcare/visit")) return;
     const app = document.querySelector("#app");
@@ -86,6 +50,7 @@
       const response = await fetch("/api/state", { cache: "no-store" });
       const data = await response.json();
       const j = data.journey;
+      if (!j) return;
       const copy = {
         APPOINTMENT_CONFIRMED:["Your appointment is ready.","When you reach the hospital, we’ll guide you through the next step.","Arrive at the hospital","OPD Block A · Ground Floor"],
         ARRIVED:["Check in first.","Show your appointment ID at Counter 3. You do not need to figure out the rest of the visit yet.","Register at Counter 3","OPD Block A · Ground Floor"],
