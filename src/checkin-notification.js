@@ -1,26 +1,26 @@
-/* Small staff-side notification when the patient checks in. */
+/* Visible staff-side toast when any patient checks in. */
 (() => {
-  const LIVE_KEY = "carepath:last-live-journey:v1";
   const ROLE_KEY = "carepath:role:v6";
+  let lastToastKey = "";
 
-  function show(message) {
-    const toast = document.querySelector("#toast");
-    if (!toast) return;
-    toast.textContent = message;
-    toast.hidden = false;
+  function show(patient) {
+    if (sessionStorage.getItem(ROLE_KEY) !== "staff" || !patient) return;
+    const key = `${patient.id}|${patient.updated}|${patient.state}`;
+    if (key === lastToastKey) return;
+    lastToastKey = key;
+
+    let toast = document.querySelector("#carepath-checkin-toast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "carepath-checkin-toast";
+      toast.setAttribute("role", "status");
+      document.body.appendChild(toast);
+    }
+    toast.innerHTML = `<span class="cp-checkin-icon">✓</span><span><b>${patient.name} checked in</b><small>Token ${patient.token} · ${patient.queueAhead ?? 0} patients ahead</small></span>`;
+    toast.classList.add("show");
     clearTimeout(window.__carepathCheckinToast);
-    window.__carepathCheckinToast = setTimeout(() => { toast.hidden = true; }, 3600);
+    window.__carepathCheckinToast = setTimeout(() => toast.classList.remove("show"), 4500);
   }
 
-  window.addEventListener("carepath:journey-updated", (event) => {
-    if (sessionStorage.getItem(ROLE_KEY) !== "staff") return;
-    const journey = event.detail;
-    if (!journey) return;
-
-    const previous = sessionStorage.getItem(LIVE_KEY) || "";
-    const previousState = previous.split("|")[1] || "";
-    if (previousState === "ARRIVED" && journey.state === "WAITING") {
-      show("✓ Ravi Kumar checked in · 3 patients ahead");
-    }
-  });
+  window.addEventListener("carepath:patient-checked-in", event => show(event.detail?.patient));
 })();
