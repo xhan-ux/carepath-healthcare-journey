@@ -21,6 +21,8 @@ export const EventType = Object.freeze({
   COMPLETE_PHARMACY: "COMPLETE_PHARMACY"
 });
 
+const currentTime = () => new Intl.DateTimeFormat("en-IN", { hour: "numeric", minute: "2-digit" }).format(new Date());
+
 export const initialJourney = Object.freeze({
   patient: { name: "Ravi Kumar", id: "DEMO-042" },
   appointment: {
@@ -38,7 +40,7 @@ export const initialJourney = Object.freeze({
   state: JourneyState.APPOINTMENT_CONFIRMED,
   room: "202",
   queueAhead: null,
-  lastUpdated: "10:12 AM",
+  lastUpdated: currentTime(),
   events: []
 });
 
