@@ -1,0 +1,33 @@
+.demo-reset-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  margin: 0 0 16px;
+  padding: 10px 18px;
+  border: 1px solid #c9dddd;
+  border-radius: 16px;
+  background: #fffdf8;
+  color: #0c666b;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+.demo-reset-button:hover { background: #eef8f6; }
+.demo-reset-button:disabled { opacity: .6; cursor: wait; }
+.demo-reset-button > span:first-child {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 50%;
+  background: #dff2ef;
+  font-size: 22px;
+}
+.demo-reset-button strong,
+.demo-reset-button small { display: block; }
+.demo-reset-button strong { font-size: 15px; }
+.demo-reset-button small { margin-top: 2px; color: #718587; font-size: 12px; }
+@media (max-width: 700px) {
+  .demo-reset-button { width: 100%; justify-content: flex-start; }
+}
